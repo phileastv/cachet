@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { fmtDay, MONTHS } from '../domain/dates';
+import { daysInMonth, fmtDay, monthStart, MONTHS, weekday } from '../domain/dates';
 import { averageRate, copyMonthTo, lastRealEnd, monthsFrom, roughMonths, workedMonths } from '../domain/future';
 import { DEFAULT_PARAMS, runScenarios } from '../domain/scenarios';
 import { diagnose } from '../domain/situation';
@@ -19,6 +19,46 @@ const monthLabel = (key: string) => {
 };
 
 type Mode = 'copy' | 'rough' | 'manual';
+
+/** Mini-calendrier d'un mois passé : jours travaillés, heures, jours et salaire brut du mois. */
+function MiniMonth({ contracts, monthKey }: { contracts: Contract[]; monthKey: string }) {
+  const [y, m] = monthKey.split('-').map(Number);
+  const first = monthStart(y, m - 1);
+  const n = daysInMonth(y, m - 1);
+  const perDay = new Map<number, { hours: number; gross: number; titles: string[] }>();
+  for (const c of contracts) {
+    if (c.teaching || c.training) continue;
+    for (const iso of c.days) {
+      if (!iso.startsWith(monthKey)) continue;
+      const d = Number(iso.slice(8, 10));
+      const cur = perDay.get(d) ?? { hours: 0, gross: 0, titles: [] };
+      cur.hours += c.hours / c.days.length;
+      cur.gross += c.gross / c.days.length;
+      cur.titles.push(c.title);
+      perDay.set(d, cur);
+    }
+  }
+  const hours = [...perDay.values()].reduce((a, x) => a + x.hours, 0);
+  const gross = [...perDay.values()].reduce((a, x) => a + x.gross, 0);
+  const lead = weekday(first);
+  return (
+    <div className="mini-month">
+      <div className="mini-cal" role="img" aria-label={`${perDay.size} jours travaillés en ${monthLabel(monthKey)}`}>
+        {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => <b key={i}>{d}</b>)}
+        {Array.from({ length: lead }, (_, i) => <span key={`l${i}`} />)}
+        {Array.from({ length: n }, (_, i) => {
+          const w = perDay.get(i + 1);
+          return <span key={i} className={w ? 'on' : ''} title={w ? `${w.titles.join(', ')} · ${Math.round(w.hours * 10) / 10} h · ${eur(w.gross)}` : undefined}>{i + 1}</span>;
+        })}
+      </div>
+      <div className="mini-stats">
+        <span><strong>{perDay.size}</strong> jours travaillés</span>
+        <span><strong>{Math.round(hours)}</strong> heures</span>
+        <span><strong>{eur(gross)}</strong> brut</span>
+      </div>
+    </div>
+  );
+}
 
 /** Accueil, dernière étape : le droit d'option ne passe pas encore → simuler les contrats à venir. */
 export function FutureStep({ onDone, withManual }: { onDone: (to: string) => void; withManual: (d: AppData) => AppData }) {
@@ -71,6 +111,7 @@ export function FutureStep({ onDone, withManual }: { onDone: (to: string) => voi
               <select value={count} onChange={(e) => setCount(Number(e.target.value))}>{[1, 2, 3, 6, 9, 12].map((n) => <option key={n} value={n}>{n} mois (jusqu'à {monthLabel(months[n - 1].key)})</option>)}</select>
             </label>
           </div>
+          {ref && <MiniMonth contracts={base.contracts} monthKey={ref} />}
           <button className="btn primary" style={{ alignSelf: 'flex-start' }} disabled={!ref} onClick={() => apply(copyMonthTo(base.contracts, ref, months.slice(0, count), uid, from))}>Simuler ces mois</button>
         </div>
       )}

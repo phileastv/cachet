@@ -391,3 +391,13 @@ table.data td.mark-known { background: var(--chom-bg) !important; color: var(--c
 /* Dernière étape de l'accueil : pas d'illustration, toute la largeur pour le guide et le dépôt */
 .ob main.full .text { flex-basis: 100%; justify-content: flex-start; }
 .ob main.full p.lead { max-width: 70ch; }
+
+/* Accueil, contrats à venir : aperçu du mois recopié */
+.mini-month { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; padding: 12px; border-radius: 14px; background: var(--card-2); }
+.mini-cal { display: grid; grid-template-columns: repeat(7, 26px); gap: 3px; font-size: 11px; text-align: center; }
+.mini-cal b { color: var(--muted); font-weight: 700; }
+.mini-cal span { height: 24px; line-height: 24px; border-radius: 6px; background: var(--empty); color: var(--muted); }
+.mini-cal span:empty { background: none; }
+.mini-cal span.on { background: var(--int); color: #fff; font-weight: 800; }
+.mini-stats { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.mini-stats strong { font-size: 20px; color: var(--int-ink); margin-right: 4px; }
