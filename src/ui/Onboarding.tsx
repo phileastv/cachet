@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { DONATE_URL, REPO_URL } from '../config';
+import { APP_NAME, DONATE_URL, REPO_URL } from '../config';
 import { fromDay, monthStart, parts } from '../domain/dates';
 import { demoData } from '../domain/demo';
 import { go } from '../state/router';
@@ -45,7 +45,7 @@ export function Onboarding() {
   return (
     <div className="ob">
       <header style={{ maxWidth: 1240, width: '100%', margin: '0 auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-        <span className="brand"><Logo /><strong>Bascule</strong></span>
+        <span className="brand"><Logo /><strong>{APP_NAME}</strong></span>
         <div className="dots" aria-label="Progression">
           {STEPS.map((t, i) => (
             <button key={t} aria-label={`Étape ${i + 1} : ${t}`} aria-current={i === step ? 'step' : undefined} onClick={() => setStep(i)}
@@ -69,7 +69,7 @@ export function Onboarding() {
                 <label className="field">Allocation brute / jour<input inputMode="decimal" value={f.aj} onChange={(e) => setF({ ...f, aj: e.target.value })} placeholder="ex. 48,70" /></label>
               </div>
               <div className="alert blue"><span className="small">Votre capital de chômage restant</span><strong style={{ fontSize: 22 }}>{eur(num(f.daysLeft) * num(f.aj))}</strong></div>
-              <span className="tiny muted">Où les trouver : page d'accueil de votre espace France Travail (jours restants) et le relevé de situation, rubrique « Informations sur vos droits » (« Allocation brute d'un montant journalier de … », pas le montant versé). Tout reste dans votre navigateur.</span>
+              <span className="tiny muted">Où les trouver : page d'accueil de votre espace France Travail (jours restants) et le relevé de situation, rubrique « Informations sur vos droits » (« Allocation brute d'un montant journalier de … », pas le montant versé). Tout reste dans votre navigateur. Plus simple et plus juste : à l'étape suivante, déposez vos relevés de situation et vos AEM en PDF, l'outil remplit tout seul.</span>
             </div>
           )}
           <div className="nav">
@@ -151,7 +151,7 @@ function ShareButton() {
     const url = location.href.split('#')[0];
     const text = 'Au chômage et bientôt intermittent·e ? Cet outil calcule quand faire son droit d’option.';
     try {
-      if (navigator.share) await navigator.share({ title: 'Bascule', text, url });
+      if (navigator.share) await navigator.share({ title: APP_NAME, text, url });
       else { await navigator.clipboard.writeText(`${text} ${url}`); setDone(true); }
     } catch { /* partage annulé */ }
   };

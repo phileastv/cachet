@@ -1,3 +1,4 @@
+import { APP_SLUG } from '../config';
 import { emptyData } from '../domain/demo';
 import { DEFAULT_RULES } from '../domain/rules';
 import type { AppData } from '../domain/types';
@@ -7,6 +8,7 @@ import type { AppData } from '../domain/types';
  * 1. Sauvegarde automatique dans ce navigateur (localStorage).
  * 2. Export / import d'un fichier .json.
  */
+// Clé fixe : elle ne suit pas le nom de l'outil, pour que les données déjà enregistrées restent lisibles.
 const KEY = 'bascule:data:v1';
 
 export function loadLocal(): AppData | null {
@@ -69,5 +71,5 @@ function download(name: string, text: string) {
 const stamp = () => new Date().toISOString().slice(0, 10);
 
 export function exportPlain(data: AppData) {
-  download(`bascule-sauvegarde-${stamp()}.json`, JSON.stringify(data, null, 2));
+  download(`${APP_SLUG}-sauvegarde-${stamp()}.json`, JSON.stringify(data, null, 2));
 }

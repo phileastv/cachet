@@ -18,6 +18,8 @@ export interface Contract {
   training?: boolean;
   /** Contrat fictif généré par un scénario (jamais enregistré). */
   generated?: boolean;
+  /** Contrat créé par l'import d'une AEM (numéro d'attestation, pour éviter les doublons). */
+  source?: { kind: 'aem' | 'aem-pending'; ref: string };
 }
 
 /** Ce qu'affiche l'espace France Travail à une date donnée. */

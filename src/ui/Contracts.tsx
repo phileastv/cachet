@@ -5,6 +5,7 @@ import type { Annexe, Contract } from '../domain/types';
 import { uid, useStore } from '../state/store';
 import { eur, eur2, num, rateColor } from './format';
 import { Calendar, Close, Info, Left, Right, Trash } from './Icons';
+import { DocImport } from './DocImport';
 import { Tour, type TourStep } from './Tour';
 
 const CONTRACT_TOUR: TourStep[] = [
@@ -25,6 +26,7 @@ export function Contracts({ tab }: { tab: 'intermittence' | 'regime' }) {
         <a href="#/contrats" aria-current={tab === 'intermittence' ? 'page' : undefined}><span className="sw" style={{ background: 'var(--int)' }} />Intermittence · contrats</a>
         <a data-tour="tab-regime" href="#/contrats/regime" aria-current={tab === 'regime' ? 'page' : undefined}><span className="sw" style={{ background: 'var(--chom)' }} />Régime général · mon chômage</a>
       </nav>
+      <DocImport />
       {tab === 'intermittence' ? <Intermittence /> : <RegimeGeneral />}
     </>
   );
@@ -88,6 +90,7 @@ function Intermittence() {
   const editing = daysEditId ? contracts.find((c) => c.id === daysEditId) ?? null : null;
 
   const nSel = sel.length;
+  const weekendSel = sel.filter((iso) => weekday(toDay(iso)) >= 5).length;
   const hoursTotal = f.hoursMode === 'total' ? num(f.hours) : f.hoursMode === 'perDay' ? num(f.hours) * nSel : num(f.hours) * 12;
   const grossTotal = f.grossMode === 'total' ? num(f.gross) : num(f.gross) * nSel;
   const canAdd = nSel > 0 && hoursTotal > 0 && grossTotal >= 0 && (grossTotal > 0 || f.teaching);
@@ -248,6 +251,9 @@ function Intermittence() {
               <label className="field">Au<input type="date" value={range.to} min={range.from || undefined} onChange={(e) => applyRange(range.from || e.target.value, e.target.value)} /></label>
             </div>
             <span className="tiny" style={{ color: 'var(--on-dark-2)', marginTop: -4 }}>ou tapez les dates : la plage se coche toute seule dans le calendrier.</span>
+            <span className="tiny" style={{ background: 'var(--warn-bg)', color: 'var(--warn-ink)', borderRadius: 8, padding: '6px 8px' }}>
+              Ne cochez que les jours <strong>réellement travaillés</strong> (nombre indiqué sur l’attestation employeur){weekendSel ? ` : ${weekendSel} samedi${weekendSel > 1 ? 's' : ''} ou dimanche${weekendSel > 1 ? 's' : ''} sélectionné${weekendSel > 1 ? 's' : ''}` : ''}. Chaque jour en trop augmente la franchise congés payés et rend le verdict plus sévère.
+            </span>
             <label className="field">Employeur ou projet<input value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="ex. Cie Hors-Champ · régie" /></label>
             <div className="grid2">
               <label className="field">Heures

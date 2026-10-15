@@ -1,4 +1,5 @@
-import { DONATE_URL, REPO_URL } from '../config';
+import { APP_NAME, APP_TAGLINE, DONATE_URL, REPO_URL } from '../config';
+import { BetaBanner } from './BetaBanner';
 import { useStore } from '../state/store';
 import { useRoute } from '../state/router';
 import { Contracts } from './Contracts';
@@ -14,7 +15,7 @@ export function App() {
   const { data } = useStore();
   const route = useRoute().split('?')[0];
 
-  if ((!data.onboarded && route !== '/sauvegarde') || route === '/bienvenue') return <Onboarding />;
+  if ((!data.onboarded && route !== '/sauvegarde') || route === '/bienvenue') return <><BetaBanner /><Onboarding /></>;
 
   let page = <Dashboard />;
   if (route === '/contrats') page = <Contracts tab="intermittence" />;
@@ -26,8 +27,9 @@ export function App() {
 
   return (
     <div className="wrap">
+      <BetaBanner />
       <header className="topbar">
-        <a className="brand" href="#/"><Logo /><strong>Bascule</strong><span className="small muted">droit d'option intermittent</span></a>
+        <a className="brand" href="#/"><Logo /><strong>{APP_NAME}</strong><span className="small muted">{APP_TAGLINE}</span></a>
         <nav className="nav" aria-label="Navigation principale">
           <a className="btn primary" href="#/contrats"><Plus />Ajouter / modifier les contrats</a>
           <a className="btn" href="#/aide">Comprendre</a>

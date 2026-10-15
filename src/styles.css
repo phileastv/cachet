@@ -315,3 +315,11 @@ table.data tr.explain p { margin: 0; max-width: 90ch; }
 
 .tank-days { display: block; font-size: 11px; font-weight: 600; opacity: .85; }
 table.data td.mark-known { background: var(--chom-bg) !important; color: var(--chom-ink); box-shadow: inset 3px 0 0 var(--chom); }
+
+/* Bandeau « outil expérimental » : toujours visible en haut de page */
+.beta-banner { position: sticky; top: 0; z-index: 50; margin: 0 0 8px; padding: 8px 14px; border-radius: 10px; font-size: 13px; line-height: 1.4; background: var(--warn-bg); color: var(--warn-ink); border: 1px solid color-mix(in srgb, var(--warn-ink) 25%, transparent); }
+
+/* Dépôt de fichiers (relevé de situation) */
+.dropzone { display: flex; flex-direction: column; gap: 4px; align-items: center; text-align: center; padding: 18px 14px; border: 2px dashed var(--chom); border-radius: 14px; background: var(--chom-bg); color: var(--chom-ink); cursor: pointer; }
+.dropzone.over { border-style: solid; filter: brightness(0.97); }
+.beta-banner a { color: inherit; font-weight: 700; }

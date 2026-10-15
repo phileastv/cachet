@@ -14,6 +14,7 @@
     "examples": "WRITE_EXAMPLES=1 vitest run src/examples"
   },
   "dependencies": {
+    "pdfjs-dist": "^5.7.284",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

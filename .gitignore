@@ -4,3 +4,6 @@ dist
 prive/
 .claude/settings.local.json
 *.pdf
+# Fichiers locaux : jamais versionnés (adresse de contact, etc.)
+.env.local
+.env.*.local
