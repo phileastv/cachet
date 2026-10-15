@@ -70,7 +70,10 @@ export function Onboarding() {
       <main>
         <section className="stage" aria-hidden="true"><Visual step={step} /></section>
         <section className="text">
-          <span className="tiny muted" style={{ fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase' }}>Étape {step + 1} sur {STEPS.length}</span>
+          <span style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+            <span className="tiny muted" style={{ fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase' }}>Étape {step + 1} sur {STEPS.length}</span>
+            {step > 0 && <span className="ob-pill">Calcul précis · gratuit</span>}
+          </span>
           <h1>{STEPS[step]}</h1>
           <Body step={step} />
           {step === last && (
@@ -112,6 +115,10 @@ function Body({ step }: { step: number }) {
       return <>
         <P>Vous êtes au chômage au régime général (le chômage « classique ») et vous enchaînez des contrats d'intermittent du spectacle ? Pour passer intermittent·e, vous devez faire ce qu'on appelle un <strong>droit d'option</strong>.</P>
         <P>Beaucoup d'intermittent·es tombent dans le piège sans le voir. Personnellement, ça m'a pris deux ans de galères pour comprendre et enfin ouvrir mes droits d'intermittent. J'ai créé cet outil pour vous aider à calculer <strong>si</strong> vous pouvez le faire, et <strong>quand</strong>.</P>
+        <div className="ob-promise">
+          <span aria-hidden="true">✓</span>
+          <p>Cet outil va vous aider à calculer <strong>précisément</strong> tout ça, <strong>gratuitement</strong> !</p>
+        </div>
       </>;
     case 1:
       return <>
