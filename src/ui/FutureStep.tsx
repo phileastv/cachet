@@ -20,6 +20,20 @@ const monthLabel = (key: string) => {
 
 type Mode = 'copy' | 'rough' | 'manual';
 
+/** Ce que donneraient les mois simulés, recalculé en direct. */
+function Verdict({ after }: { after: ReturnType<typeof optionVerdict> | null }) {
+  if (!after) return null;
+  return after.req ? (
+    <div className="alert" role="status" style={{ background: 'var(--ok-bg)', color: 'var(--ok-ink)' }}>
+      <span className="small"><strong>Avec ces mois simulés, le droit d'option deviendrait possible le {fmtDay(after.req.day)}.</strong> {after.req.presumed ? `Allocation intermittente estimée : ${eur(after.req.presumed.monthly)} par mois.` : ''}</span>
+    </div>
+  ) : (
+    <div className="alert warn" role="status">
+      <span className="small"><strong>Même avec ces mois, le droit d'option ne passe pas encore.</strong> {after.situation.title}. Le tableau de bord compare d'autres scénarios (travailler plus ou moins, un mois sur deux, cours, formation…).</span>
+    </div>
+  );
+}
+
 /** Aperçu, mois par mois, des contrats qui seront simulés (en violet). */
 function SimPreview({ contracts }: { contracts: Contract[] }) {
   const keys = [...new Set(contracts.flatMap((c) => c.days.map((d) => d.slice(0, 7))))].sort();
@@ -80,11 +94,11 @@ function MiniMonth({ contracts, monthKey, sim = false, small = false }: { contra
 export function FutureStep({ onDone, withManual }: { onDone: (to: string) => void; withManual: (d: AppData) => AppData }) {
   const { data, today, update } = useStore();
   const [mode, setMode] = useState<Mode>('copy');
-  const [added, setAdded] = useState<string[]>([]);
-  const base = useMemo(() => ({ ...data, contracts: data.contracts.filter((c) => !added.includes(c.id)) }), [data, added]);
+  const base = data;
+  // La simulation part du lendemain du dernier contrat attesté (dernière AEM), même s'il est passé :
+  // les mois sans AEM encore reçue (ex. septembre) sont simulés aussi.
   const end = lastRealEnd(base.contracts) ?? today;
-  // À partir du lendemain du dernier contrat (ou d'aujourd'hui) : jamais de jour simulé dans le passé
-  const from = Math.max(end, today);
+  const from = end;
   const months = monthsFrom(from + 1, 12);
   const worked = workedMonths(base.contracts);
   const rate = averageRate(base.contracts);
@@ -98,12 +112,15 @@ export function FutureStep({ onDone, withManual }: { onDone: (to: string) => voi
   const copyPreview = useMemo(() => (ref ? copyMonthTo(base.contracts, ref, months.slice(0, count), fake, from) : []), [base.contracts, ref, count, from]);
   const roughPreview = roughMonths(months.slice(0, 6).map((mm) => ({ y: mm.y, m: mm.m, days: Math.round(num(days[mm.key] ?? '')) })), { gross: num(perDay.gross), hours: num(perDay.hours) || 8 }, data.profile.annexe, fake, from);
   const before = useMemo(() => optionVerdict(withManual(base), today), [base, today, withManual]);
-  const after = useMemo(() => (added.length ? optionVerdict(withManual(data), today) : null), [added, data, today, withManual]);
+  // Verdict recalculé en direct sur l'aperçu, avant d'enregistrer
+  const preview = mode === 'copy' ? copyPreview : mode === 'rough' ? roughPreview : [];
+  const previewKey = JSON.stringify(preview.map((c) => [c.days, c.hours, c.gross]));
+  const after = useMemo(() => (preview.length ? optionVerdict(withManual({ ...base, contracts: [...base.contracts, ...preview] }), today) : null), [previewKey, base, today, withManual]);
 
-  /** Remplace la simulation précédente de cette étape par la nouvelle. */
-  const apply = (next: Contract[]) => {
-    update((d) => ({ ...d, contracts: [...d.contracts.filter((c) => !added.includes(c.id)), ...next] }));
-    setAdded(next.map((c) => c.id));
+  /** Ajoute les contrats simulés et montre le tableau de bord. */
+  const applyAndGo = (next: Contract[]) => {
+    update((d) => ({ ...d, contracts: [...d.contracts, ...next] }));
+    onDone('/');
   };
 
   const why = before.situation.kind === 'never-hours' || before.situation.kind === 'later-hours' ? 'il vous manque encore des heures sur 12 mois' : 'votre chômage restant est encore trop élevé par rapport à votre droit intermittent';
@@ -133,7 +150,8 @@ export function FutureStep({ onDone, withManual }: { onDone: (to: string) => voi
           </div>
           {ref && <MiniMonth contracts={base.contracts} monthKey={ref} />}
           {ref && <SimPreview contracts={copyPreview} />}
-          <button className="btn primary" style={{ alignSelf: 'flex-start' }} disabled={!ref} onClick={() => apply(copyMonthTo(base.contracts, ref, months.slice(0, count), uid, from))}>Simuler ces mois</button>
+          <Verdict after={after} />
+          <button className="btn primary" style={{ alignSelf: 'flex-start', minHeight: 48 }} disabled={!ref || !copyPreview.length} onClick={() => applyAndGo(copyMonthTo(base.contracts, ref, months.slice(0, count), uid, from))}>Simuler ces mois et voir mon tableau de bord →</button>
         </div>
       )}
 
@@ -160,9 +178,10 @@ export function FutureStep({ onDone, withManual }: { onDone: (to: string) => voi
             ))}
           </div>
           <SimPreview contracts={roughPreview} />
-          <button className="btn primary" style={{ alignSelf: 'flex-start' }} disabled={!num(perDay.gross) || !months.slice(0, 6).some((m) => num(days[m.key] ?? '') > 0)}
-            onClick={() => apply(roughMonths(months.slice(0, 6).map((m) => ({ y: m.y, m: m.m, days: Math.round(num(days[m.key] ?? '')) })), { gross: num(perDay.gross), hours: num(perDay.hours) || 8 }, data.profile.annexe, uid, from))}>
-            Simuler ces mois
+          <Verdict after={after} />
+          <button className="btn primary" style={{ alignSelf: 'flex-start', minHeight: 48 }} disabled={!num(perDay.gross) || !roughPreview.length}
+            onClick={() => applyAndGo(roughMonths(months.slice(0, 6).map((m) => ({ y: m.y, m: m.m, days: Math.round(num(days[m.key] ?? '')) })), { gross: num(perDay.gross), hours: num(perDay.hours) || 8 }, data.profile.annexe, uid, from))}>
+            Simuler ces mois et voir mon tableau de bord →
           </button>
         </div>
       )}
@@ -174,23 +193,10 @@ export function FutureStep({ onDone, withManual }: { onDone: (to: string) => voi
         </div>
       )}
 
-      {after && (
-        after.req ? (
-          <div className="alert" role="status" style={{ background: 'var(--ok-bg)', color: 'var(--ok-ink)' }}>
-            <span className="small"><strong>Avec ces contrats prévus, le droit d'option deviendrait possible le {fmtDay(after.req.day)}.</strong> {after.req.presumed ? `Allocation intermittente estimée : ${eur(after.req.presumed.monthly)} par mois.` : ''} Vous pourrez ajuster ces contrats simulés à tout moment.</span>
-          </div>
-        ) : (
-          <div className="alert warn" role="status">
-            <span className="small"><strong>Même avec ces contrats, le droit d'option ne passe pas encore.</strong> {after.situation.title}. Le tableau de bord compare d'autres scénarios (travailler plus ou moins, un mois sur deux, cours, formation…).</span>
-          </div>
-        )
-      )}
-
       <div className="nav">
-        {added.length > 0 && <button className="btn primary" style={{ minHeight: 48 }} onClick={() => onDone('/')}>Voir mon tableau de bord →</button>}
-        <button className="btn" style={{ minHeight: 48 }} onClick={() => { if (added.length) apply([]); onDone('/'); }}>Non, aucun autre contrat prévu</button>
+        <button className="btn" style={{ minHeight: 48 }} onClick={() => onDone('/')}>Non, aucun autre contrat prévu</button>
       </div>
-      <span className="tiny muted">Les contrats simulés apparaissent hachurés dans le calendrier : vous pourrez les modifier, les supprimer ou les remplacer par les vrais quand vous aurez leurs AEM.</span>
+      <span className="tiny muted">Les contrats simulés apparaissent en violet dans le calendrier : vous pourrez les modifier, les supprimer ou les remplacer par les vrais quand vous aurez leurs AEM.</span>
     </div>
   );
 }

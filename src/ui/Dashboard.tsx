@@ -12,7 +12,7 @@ import { Tour, type TourStep } from './Tour';
 
 const DASH_TOUR: TourStep[] = [
   { target: 'headline', title: 'La réponse, en une phrase', body: <>Le jour où vous pourrez envoyer votre demande de droit d'option avec vos contrats actuels, et la stratégie la plus rapide.</> },
-  { target: 'calendar', title: 'Mois par mois', body: <>Chaque ligne est un mois. Les carrés orange sont vos jours d'intermittence (plus foncé = mieux payé, hachuré = simulé), la barre bleue le chômage versé. À droite : heures, chômage et « Droit d'option ». Cliquez un mois pour voir le détail du calcul.</> },
+  { target: 'calendar', title: 'Mois par mois', body: <>Chaque ligne est un mois. Les carrés orange sont vos jours d'intermittence (plus foncé = mieux payé), les violets vos contrats simulés, la barre bleue le chômage versé. À droite : heures, chômage et « Droit d'option ». Cliquez un mois pour voir le détail du calcul.</> },
   { target: 'toolbar', title: 'Voyager dans le temps', body: <>Survolez les jours ou utilisez le curseur : les réservoirs suivent. « Aujourd'hui » et « ★ Jour de la demande » vous y ramènent d'un clic.</> },
   { target: 'side', title: 'Les deux réservoirs', body: <>Votre chômage restant (bleu) et votre droit intermittent (orange). Le pointillé = chômage restant + 30 % : quand l'orange passe au-dessus, c'est possible.</> },
   { target: 'scenarios', title: 'Et si… ?', body: <>Comparez les stratégies : travailler comme d'habitude, arrêter, ralentir, un mois sur deux… « Voir la simulation » remplit le calendrier avec des contrats fictifs.</> },
@@ -273,7 +273,7 @@ function MonthLine({ M, sim, cursor, today, open, onToggle, onPick, onHover }: {
           <span style={{ display: 'inline-block', width: 12, transition: 'transform .2s', transform: `rotate(${open ? 90 : 0}deg)`, color: 'var(--muted)' }}>›</span>
           <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
             {cap(M.key).replace(/^\w/, (c) => c.toUpperCase())}
-            <span className="tiny" style={{ color: tag === 'fictif' ? '#5b3fc4' : 'var(--int-ink)' }}>{tag}</span>
+            <span className="tiny" style={{ color: tag === 'fictif' ? '#5b3fc4' : 'var(--sim)' }}>{tag}</span>
           </span>
         </button>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -287,7 +287,7 @@ function MonthLine({ M, sim, cursor, today, open, onToggle, onPick, onHover }: {
               if (ct) {
                 if (expired) bg = 'var(--expired)';
                 else if (ct.generated) bg = 'repeating-linear-gradient(-45deg,var(--gen) 0 3px,#fff 3px 5px)';
-                else if (ct.simulated) bg = `repeating-linear-gradient(45deg,${rateColor(c.rate)} 0 3px,#fff 3px 5px)`;
+                else if (ct.simulated) bg = 'var(--sim)';
                 else bg = rateColor(c.rate);
               }
               const cls = ['dcell', c.day > cursor ? 'after' : '', c.day === cursor ? 'cursor' : '', c.day === today ? 'today' : '', c.day === req ? 'request' : ''].join(' ');

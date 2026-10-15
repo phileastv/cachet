@@ -203,7 +203,7 @@ function Intermittence() {
               if (c) {
                 const r = c.gross / c.days.length;
                 if (old) { bg = 'var(--expired)'; col = '#16202c'; }
-                else if (c.simulated) bg = `repeating-linear-gradient(45deg,${rateColor(r)} 0 4px,#fff 4px 8px)`;
+                else if (c.simulated) { bg = 'var(--sim)'; col = '#fff'; }
                 else { bg = rateColor(r); col = r >= 210 ? '#fff' : '#16202c'; }
                 if (c.teaching && !old) bg = 'repeating-linear-gradient(90deg,#c9b8ff 0 4px,#fff 4px 8px)';
               }

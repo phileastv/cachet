@@ -142,14 +142,14 @@ h2 { font-family: var(--hand); font-size: 32px; font-weight: 700; }
 .badge.no { background: var(--empty); color: var(--muted); }
 .badge.ok { background: var(--ok-bg); color: var(--ok-ink); }
 .badge.gap { background: var(--warn-bg); color: var(--warn-ink); }
-.badge.sim { background: #ffe9d6; color: #8a3d00; }
+.badge.sim { background: var(--sim-bg); color: var(--sim); }
 .badge.gen { background: #ece6ff; color: #4a32b0; }
 .badge.real { background: var(--int-1); color: #5a2600; }
 .badge.old { background: var(--empty); color: var(--muted); }
 .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--ink-2); }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
-.hatch-sim { background: repeating-linear-gradient(45deg, var(--int) 0 2px, #fff 2px 4px); }
+.hatch-sim { background: var(--sim); }
 .hatch-gen { background: repeating-linear-gradient(-45deg, var(--gen) 0 2px, #fff 2px 4px); }
 
 /* Alertes */
