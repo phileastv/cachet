@@ -72,6 +72,7 @@ export function FutureStep({ onDone, withManual }: { onDone: (to: string) => voi
   const months = monthsFrom(from + 1, 12);
   const worked = workedMonths(base.contracts);
   const rate = averageRate(base.contracts);
+  const realDays = base.contracts.filter((c) => !c.simulated && !c.teaching && !c.training && c.gross > 0).reduce((n, c) => n + c.days.length, 0);
   const [ref, setRef] = useState(worked[0] ?? '');
   const [count, setCount] = useState(6);
   const [days, setDays] = useState<Record<string, string>>({});
@@ -118,7 +119,15 @@ export function FutureStep({ onDone, withManual }: { onDone: (to: string) => voi
 
       {mode === 'rough' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <span className="small muted">Indiquez à peu près combien de jours vous pensez travailler chaque mois. On prend votre rythme moyen, modifiable.</span>
+          <span className="small muted">Indiquez à peu près combien de jours vous pensez travailler chaque mois.</span>
+          {rate ? (
+            <span className="small" style={{ background: 'var(--card-2)', borderRadius: 10, padding: '8px 10px' }}>
+              Salaire et heures par jour <strong>pré-remplis avec la moyenne de vos contrats déjà saisis</strong> : {eur(rate.gross)} brut et {String(Math.round(rate.hours * 10) / 10).replace('.', ',')} h par jour travaillé, sur {realDays} jours.
+              {(num(perDay.gross) !== Math.round(rate.gross) || num(perDay.hours) !== Math.round(rate.hours * 10) / 10) && (
+                <> <button className="btn sm ghost" onClick={() => setPerDay({ gross: String(Math.round(rate.gross)), hours: String(Math.round(rate.hours * 10) / 10).replace('.', ',') })}>Revenir à la moyenne</button></>
+              )}
+            </span>
+          ) : <span className="small muted">Aucun contrat saisi : indiquez votre salaire brut et vos heures par jour habituels.</span>}
           <div className="grid2">
             <label className="field">Salaire brut moyen par jour (€)<input inputMode="decimal" value={perDay.gross} onChange={(e) => setPerDay({ ...perDay, gross: e.target.value })} /></label>
             <label className="field">Heures par jour<input inputMode="decimal" value={perDay.hours} onChange={(e) => setPerDay({ ...perDay, hours: e.target.value })} /></label>
