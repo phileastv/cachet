@@ -323,3 +323,45 @@ table.data td.mark-known { background: var(--chom-bg) !important; color: var(--c
 .dropzone { display: flex; flex-direction: column; gap: 4px; align-items: center; text-align: center; padding: 18px 14px; border: 2px dashed var(--chom); border-radius: 14px; background: var(--chom-bg); color: var(--chom-ink); cursor: pointer; }
 .dropzone.over { border-style: solid; filter: brightness(0.97); }
 .beta-banner a { color: inherit; font-weight: 700; }
+
+/* Guides illustrés « où trouver mes documents » */
+.guide { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.guide-step { display: flex; flex-direction: column; gap: 8px; background: var(--card-2); border-radius: 14px; padding: 10px; }
+.guide-text { display: flex; flex-direction: column; gap: 4px; }
+.guide-n { font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--chom-ink); }
+.guide-icon { display: inline-flex; vertical-align: middle; padding: 2px; border-radius: 6px; background: var(--chom-bg); color: var(--chom-ink); }
+.guide.compact .guide-mock { display: none; }
+.guide-mock { min-height: 118px; display: flex; align-items: center; justify-content: center; }
+.mock-win { width: 100%; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--card); font-size: 10.5px; line-height: 1.3; }
+.mock-bar { display: flex; align-items: center; gap: 4px; padding: 5px 8px; background: var(--empty); color: var(--muted); }
+.mock-bar i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); }
+.mock-bar span { margin-left: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mock-body { padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+.mock-head { background: var(--chom-bg); color: var(--chom-ink); border-radius: 6px; padding: 6px 8px; font-size: 12px; }
+.mock-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.mock-tabs span { padding: 3px 6px; border-radius: 6px; background: var(--empty); color: var(--muted); }
+.mock-tabs span.on { background: var(--card); color: var(--chom-ink); font-weight: 700; box-shadow: 0 0 0 1.5px var(--chom); }
+.mock-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.mock-cards span { height: 26px; border-radius: 6px; background: var(--empty); }
+.mock-top { display: flex; justify-content: flex-end; gap: 6px; }
+.mock-btn { width: 26px; height: 26px; border-radius: 7px; background: var(--empty); display: grid; place-items: center; color: var(--muted); }
+.mock-btn.hl { background: var(--chom); color: #fff; box-shadow: 0 0 0 3px var(--chom-bg), 0 0 0 5px var(--chom); }
+.mock-user { width: 60px; height: 26px; border-radius: 7px; background: var(--empty); }
+.mock-arrow { align-self: flex-end; margin-right: 52px; font-weight: 800; color: var(--chom-ink); }
+.mock-row { display: flex; align-items: center; gap: 6px; padding: 5px 6px; border-radius: 7px; background: var(--empty); color: var(--muted); }
+.mock-row span { display: flex; flex-direction: column; flex: 1; }
+.mock-row b { color: var(--ink); }
+.mock-row em { font-style: normal; border: 1px solid var(--line); border-radius: 6px; padding: 1px 5px; }
+.mock-row.hl { background: var(--chom-bg); color: var(--chom-ink); box-shadow: 0 0 0 2px var(--chom); }
+.mock-row.hl em { background: var(--chom); color: #fff; border-color: var(--chom); }
+.mock-pdf { display: inline-grid; place-items: center; min-width: 26px; height: 30px; border-radius: 4px; background: #e8584a; color: #fff; font-size: 9px; font-weight: 800; }
+.mock-pdf.big { width: 46px; height: 58px; font-size: 12px; box-shadow: 0 2px 6px rgb(0 0 0 / .15); }
+.mock-stack { display: flex; }
+.mock-stack .mock-pdf + .mock-pdf { margin-left: -18px; transform: rotate(6deg); }
+.mock-drop { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; padding: 14px 8px; border: 2px dashed var(--int); border-radius: 12px; color: var(--int-ink); font-size: 20px; }
+.mock-drop b { font-size: 12px; }
+.mock-drop small { font-size: 10px; }
+.toggle-manual > summary { cursor: pointer; font-weight: 700; padding: 10px 0; }
+.toggle-manual > summary::marker { color: var(--muted); }
+.mock-row .mock-pdf { flex: none; display: inline-grid; width: 24px; height: 28px; }
+.mock-stack .mock-pdf.big { flex: none; }

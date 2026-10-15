@@ -5,7 +5,9 @@ import { demoData } from '../domain/demo';
 import { go } from '../state/router';
 import { uid, useStore } from '../state/store';
 import { eur, num } from './format';
+import { DocImport } from './DocImport';
 import { Logo } from './Icons';
+import { ReleveGuide } from './ImportGuides';
 
 const STEPS = [
   'Vous voulez devenir intermittent·e ?',
@@ -26,6 +28,7 @@ export function Onboarding() {
   const [step, setStep] = useState(0);
   const last = STEPS.length - 1;
   // Le bloc « Informations sur vos droits » d'un relevé est arrêté au dernier jour du mois précédent
+  const releveCount = data.profile.releves.length;
   const [f, setF] = useState({ daysLeft: '', date: fromDay(monthStart(parts(today).y, parts(today).m) - 1), aj: '' });
 
   const finish = (withDemo: boolean) => {
@@ -63,13 +66,21 @@ export function Onboarding() {
           <Body step={step} />
           {step === last && (
             <div className="card" style={{ gap: 12 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10 }}>
-                <label className="field">Jours restants<input inputMode="numeric" value={f.daysLeft} onChange={(e) => setF({ ...f, daysLeft: e.target.value })} placeholder="ex. 220" /></label>
-                <label className="field">au (date « au » du relevé)<input type="date" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} /></label>
-                <label className="field">Allocation brute / jour<input inputMode="decimal" value={f.aj} onChange={(e) => setF({ ...f, aj: e.target.value })} placeholder="ex. 48,70" /></label>
-              </div>
-              <div className="alert blue"><span className="small">Votre capital de chômage restant</span><strong style={{ fontSize: 22 }}>{eur(num(f.daysLeft) * num(f.aj))}</strong></div>
-              <span className="tiny muted">Où les trouver : page d'accueil de votre espace France Travail (jours restants) et le relevé de situation, rubrique « Informations sur vos droits » (« Allocation brute d'un montant journalier de … », pas le montant versé). Tout reste dans votre navigateur. Plus simple et plus juste : à l'étape suivante, déposez vos relevés de situation et vos AEM en PDF, l'outil remplit tout seul.</span>
+              <strong>Le plus simple : déposez votre dernier relevé de situation</strong>
+              <ReleveGuide />
+              <DocImport kind="releve" compact />
+              {releveCount > 0 && <span className="small" style={{ color: 'var(--ok)' }}>✓ Relevé enregistré : vous pouvez continuer.</span>}
+              <details className="toggle-manual">
+                <summary>Ou saisir les chiffres à la main</summary>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10 }}>
+                  <label className="field">Jours restants<input inputMode="numeric" value={f.daysLeft} onChange={(e) => setF({ ...f, daysLeft: e.target.value })} placeholder="ex. 220" /></label>
+                  <label className="field">au (date « au » du relevé)<input type="date" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} /></label>
+                  <label className="field">Allocation brute / jour<input inputMode="decimal" value={f.aj} onChange={(e) => setF({ ...f, aj: e.target.value })} placeholder="ex. 48,70" /></label>
+                </div>
+                <div className="alert blue" style={{ marginTop: 10 }}><span className="small">Votre capital de chômage restant</span><strong style={{ fontSize: 22 }}>{eur(num(f.daysLeft) * num(f.aj))}</strong></div>
+                <span className="tiny muted">Dans le relevé de situation, bloc « Informations sur vos droits au … » : « Durée d'indemnisation restante » et « Allocation brute d'un montant journalier de … » (pas le montant versé).</span>
+              </details>
+              <span className="tiny muted">Tout reste dans votre navigateur, et le code de l'outil est libre. À l'étape suivante, déposez vos AEM : vos contrats se créent tout seuls.</span>
             </div>
           )}
           <div className="nav">
@@ -141,7 +152,7 @@ function Body({ step }: { step: number }) {
         </div>
       </>;
     default:
-      return <P>Dernière étape : recopiez votre dernier relevé France Travail. Les calculs partiront de là, et vous pourrez le mettre à jour chaque mois.</P>;
+      return <P>Dernière étape : déposez votre dernier relevé de situation France Travail (ou recopiez ses chiffres). Les calculs partiront de là, et vous pourrez le mettre à jour chaque mois.</P>;
   }
 }
 

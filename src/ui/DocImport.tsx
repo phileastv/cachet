@@ -15,7 +15,19 @@ interface Found {
   aems: ParsedAem[];
   /** AEM déjà importées auparavant (même numéro d'attestation). */
   known: number;
+  /** Doublons repérés : même fichier déposé deux fois, même AEM, relevé déjà enregistré. */
+  dupes: string[];
   unknownFiles: string[];
+}
+
+/** Empreinte d'un fichier (repère un même PDF déposé deux fois, quel que soit son nom). */
+async function fingerprint(f: File): Promise<string> {
+  try {
+    const h = await crypto.subtle.digest('SHA-256', await f.arrayBuffer());
+    return [...new Uint8Array(h)].map((b) => b.toString(16).padStart(2, '0')).join('');
+  } catch {
+    return `${f.name}:${f.size}`;
+  }
 }
 
 const fd = (iso: string) => fmtDay(toDay(iso));
@@ -24,7 +36,7 @@ const fd = (iso: string) => fmtDay(toDay(iso));
  * Glisser-déposer les documents France Travail et employeurs (relevés de situation, AEM) :
  * lecture dans le navigateur, résumé à vérifier, puis ajout au dossier.
  */
-export function DocImport() {
+export function DocImport({ kind = 'aem', compact = false }: { kind?: 'releve' | 'aem'; compact?: boolean }) {
   const { data, update } = useStore();
   const [over, setOver] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -44,8 +56,16 @@ export function DocImport() {
     const unpaid: Found['unpaid'] = [];
     const aems: ParsedAem[] = [];
     const unknownFiles: string[] = [];
+    const dupes: string[] = [];
+    const seen = new Set<string>();
     let waiting: string | null = null;
     for (const f of files) {
+      const fp = await fingerprint(f);
+      if (seen.has(fp)) {
+        dupes.push(`${f.name} déposé deux fois`);
+        continue;
+      }
+      seen.add(fp);
       if (!(f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf'))) {
         unknownFiles.push(`${f.name} (pas un PDF)`);
         continue;
@@ -68,8 +88,17 @@ export function DocImport() {
       }
     }
     const knownRefs = new Set(data.contracts.map((c) => c.source?.ref).filter(Boolean));
-    const fresh = [...new Map(aems.map((a) => [a.ref, a])).values()].filter((a) => !knownRefs.has(a.ref));
-    setFound({ info: latestInfo({ isReleve: true, infos, months: [], notes: [] }), notes, unpaid, waiting, aems: fresh.sort((a, b) => (a.month + a.start < b.month + b.start ? -1 : 1)), known: aems.length - fresh.length, unknownFiles });
+    const unique = [...new Map(aems.map((a) => [a.ref, a])).values()];
+    if (unique.length < aems.length) dupes.push(`${aems.length - unique.length} AEM en double dans les fichiers déposés`);
+    const fresh = unique.filter((a) => !knownRefs.has(a.ref));
+    const info = latestInfo({ isReleve: true, infos, months: [], notes: [] });
+    const same = info && data.profile.releves.find((r) => r.date === info.date);
+    if (same && info) {
+      dupes.push(same.daysLeft === info.daysLeft && same.dailyAllowance === info.dailyAllowance
+        ? `relevé au ${fd(info.date)} déjà enregistré (identique)`
+        : `relevé au ${fd(info.date)} déjà enregistré avec d'autres chiffres : il sera remplacé`);
+    }
+    setFound({ info, notes, unpaid, waiting, aems: fresh.sort((a, b) => (a.month + a.start < b.month + b.start ? -1 : 1)), known: unique.length - fresh.length, dupes, unknownFiles });
     setKeepUnpaid(unpaid.map(() => true));
     setEnds({});
     setBusy(false);
@@ -110,13 +139,14 @@ export function DocImport() {
     setFound(null);
   };
 
-  const open = found ? openContracts(found.aems) : [];
+  // Seul le contrat le plus récent fixe la fin de contrat de la demande : on ne demande la date de fin que pour lui
+  const lastMonth = found?.aems.reduce((m, a) => (a.month > m ? a.month : m), '') ?? '';
+  const open = found ? openContracts(found.aems).filter((a) => a.month === lastMonth) : [];
   const totalH = found?.aems.reduce((s, a) => s + (a.hours ?? 0), 0) ?? 0;
   const totalG = found?.aems.reduce((s, a) => s + (a.grossSubject ?? a.gross ?? 0), 0) ?? 0;
 
   return (
-    <section className="card" style={{ gap: 10 }}>
-      <h2 style={{ fontSize: 17 }}>Importer mes documents</h2>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <label
         className={`dropzone${over ? ' over' : ''}`}
         onDragOver={(e) => { e.preventDefault(); setOver(true); }}
@@ -124,13 +154,13 @@ export function DocImport() {
         onDrop={(e) => { e.preventDefault(); setOver(false); read([...e.dataTransfer.files]); }}
       >
         <input type="file" accept="application/pdf,.pdf" multiple hidden onChange={(e) => { read([...(e.target.files ?? [])]); e.target.value = ''; }} />
-        <strong>{busy ? 'Lecture en cours…' : 'Déposez ici tous vos relevés de situation et vos AEM (PDF), d’un coup'}</strong>
-        <span className="tiny">ou cliquez pour les choisir. Les contrats et votre reliquat se remplissent tout seuls.</span>
+        <strong>{busy ? 'Lecture en cours…' : kind === 'releve' ? 'Déposez ici votre relevé de situation (PDF)' : 'Déposez ici toutes vos AEM (PDF), d’un coup'}</strong>
+        <span className="tiny">{kind === 'releve' ? 'ou cliquez pour le choisir. Plusieurs relevés à la fois, c’est possible : votre chômage restant se remplit tout seul.' : 'ou cliquez pour les choisir. Les contrats se créent tout seuls. Vous pouvez aussi y déposer vos relevés de situation.'}</span>
       </label>
-      <span className="tiny muted">
+      {!compact && <span className="tiny muted">
         Tout est lu <strong>dans votre navigateur</strong> : aucun fichier n'est envoyé, et le code de l'outil est libre et public. Les documents officiels donnent le calcul le plus juste :
         vrais jours travaillés, carence et différés, délai d'attente, reliquat exact. Seuls les chiffres utiles au calcul sont gardés (jamais votre nom, numéro de sécurité sociale ou adresse).
-      </span>
+      </span>}
       {done && <div className="alert blue" role="status"><span className="small">{done}</span></div>}
       {found && (
         <div className="alert blue" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 10 }}>
@@ -162,7 +192,7 @@ export function DocImport() {
                   <tbody>
                     {found.aems.map((a) => (
                       <tr key={a.ref} style={a.doubts.length ? { background: 'var(--warn-bg)' } : undefined} title={a.doubts.length ? `À vérifier : ${a.doubts.join(', ')}` : undefined}>
-                        <td>{a.month.slice(5)}/{a.month.slice(0, 4)}</td><td>{a.employer || '—'}</td>
+                        <td>{a.month.slice(5)}/{a.month.slice(0, 4)}{a.initialRef ? <span className="tiny muted"> (suite)</span> : null}</td><td>{a.employer || '—'}</td>
                         <td className="tiny">{fd(a.start)} → {a.end ? fd(a.end) : 'en cours'}</td>
                         <td className="num">{a.hours ?? '?'}</td><td className="num">{a.workedDays ?? '?'}</td><td className="num">{a.grossSubject ?? a.gross ?? '?'}</td><td>{a.annexe ?? '?'}</td>
                       </tr>
@@ -173,14 +203,17 @@ export function DocImport() {
               <span className="tiny">Les jours précis ne figurent pas sur l'AEM : l'outil place le nombre de jours travaillés sur les jours de semaine du contrat. Seul ce nombre compte pour le calcul.</span>
               {open.map((a) => (
                 <label key={a.ref} className="field small">
-                  Contrat {a.employer ? `chez ${a.employer} ` : ''}encore en cours fin {a.month.slice(5)}/{a.month.slice(0, 4)} : date de fin du contrat ?
-                  <span className="tiny" style={{ fontWeight: 400 }}>Elle fixe la fin de contrat retenue pour la demande. Laissez vide si vous ne la connaissez pas.</span>
+                  Contrat {a.employer ? `chez ${a.employer} ` : ''}encore en cours fin {a.month.slice(5)}/{a.month.slice(0, 4)} (l'AEM du mois suivant manque) : date de fin du contrat ?
+                  <span className="tiny" style={{ fontWeight: 400 }}>
+                    Elle fixe la fin de contrat retenue pour votre demande (contrat de travail ou dernière AEM). Laissez vide si vous ne la connaissez pas encore.
+                  </span>
                   <input type="date" value={ends[a.ref] ?? ''} min={a.start} onChange={(e) => setEnds({ ...ends, [a.ref]: e.target.value })} />
                 </label>
               ))}
               <label className="check small"><input type="checkbox" checked={replace} onChange={(e) => setReplace(e.target.checked)} />Remplacer les contrats saisis à la main sur ces périodes (évite les doublons)</label>
             </>
           )}
+          {found.dupes.length > 0 && <span className="tiny"><strong>Doublons :</strong> {found.dupes.join(' · ')}.</span>}
           {found.known > 0 && <span className="tiny">{found.known} AEM déjà importée{found.known > 1 ? 's' : ''} auparavant : ignorée{found.known > 1 ? 's' : ''}.</span>}
           {found.unknownFiles.length > 0 && <span className="tiny">Non lus : {found.unknownFiles.join(' · ')}. Saisissez-les à la main.</span>}
           <div className="nav">
@@ -189,6 +222,6 @@ export function DocImport() {
           </div>
         </div>
       )}
-    </section>
+    </div>
   );
 }

@@ -6,13 +6,14 @@ import { uid, useStore } from '../state/store';
 import { eur, eur2, num, rateColor } from './format';
 import { Calendar, Close, Info, Left, Right, Trash } from './Icons';
 import { DocImport } from './DocImport';
+import { AemGuide, ReleveGuide } from './ImportGuides';
 import { Tour, type TourStep } from './Tour';
 
 const CONTRACT_TOUR: TourStep[] = [
-  { target: 'cal', title: '1. Cochez vos jours', body: <>Cliquez les jours travaillés dans le calendrier. Pour une plage, cliquez le premier jour puis <kbd>Maj ⇧</kbd> + clic sur le dernier. Les pastilles du haut changent de mois.</> },
-  { target: 'form', title: '2. Remplissez à droite', body: <>Employeur, heures (au total, par jour ou en cachets) et salaire brut (total ou par jour). Cochez « simulation » pour un contrat pas encore signé, puis « Ajouter le contrat ».</> },
+  { target: 'import', title: '1. Déposez vos AEM', body: <>Le plus simple et le plus juste : glissez ici toutes vos attestations employeur (PDF). Les contrats se créent tout seuls, avec les vrais jours travaillés. Rien n'est envoyé : tout est lu dans votre navigateur.</> },
+  { target: 'cal', title: '2. Vérifiez sur le calendrier', body: <>Vos contrats apparaissent sur le calendrier. Pour en ajouter un à la main (contrat sans AEM, contrat à venir), cochez ses jours : le formulaire « Ajouter un contrat à la main » s'ouvre à droite.</> },
   { target: 'list', title: '3. Retrouvez-les ici', body: <>Tous vos contrats s'affichent en bas, triés par date. Cliquez une ligne pour la modifier, changer ses jours sur le calendrier, la dupliquer ou la supprimer.</> },
-  { target: 'tab-regime', title: '4. Et votre chômage', body: <>Dans l'onglet « Régime général », gardez votre dernier relevé à jour (jours restants et allocation par jour) : tous les calculs partent de là.</> },
+  { target: 'tab-regime', title: '4. Et votre chômage', body: <>Dans l'onglet « Régime général », déposez votre dernier relevé de situation : tous les calculs partent de là.</> },
 ];
 
 export function Contracts({ tab }: { tab: 'intermittence' | 'regime' }) {
@@ -26,7 +27,6 @@ export function Contracts({ tab }: { tab: 'intermittence' | 'regime' }) {
         <a href="#/contrats" aria-current={tab === 'intermittence' ? 'page' : undefined}><span className="sw" style={{ background: 'var(--int)' }} />Intermittence · contrats</a>
         <a data-tour="tab-regime" href="#/contrats/regime" aria-current={tab === 'regime' ? 'page' : undefined}><span className="sw" style={{ background: 'var(--chom)' }} />Régime général · mon chômage</a>
       </nav>
-      <DocImport />
       {tab === 'intermittence' ? <Intermittence /> : <RegimeGeneral />}
     </>
   );
@@ -51,6 +51,11 @@ function Intermittence() {
   const [daysEditId, setDaysEditId] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [range, setRange] = useState({ from: '', to: '' });
+  // Saisie manuelle repliée par défaut (l'import des AEM est le chemin principal) ; elle s'ouvre dès qu'on coche un jour
+  const [manualOpen, setManualOpen] = useState(false);
+  useEffect(() => {
+    if (sel.length) setManualOpen(true);
+  }, [sel.length]);
 
   // Arrivée depuis le tableau de bord avec « ?edit=ID » : on ouvre directement ce contrat
   useEffect(() => {
@@ -158,6 +163,11 @@ function Intermittence() {
   return (
     <>
       <Tour id="contrats" steps={CONTRACT_TOUR} />
+      <section className="card" data-tour="import" style={{ gap: 12, boxShadow: 'inset 4px 0 0 var(--int)' }}>
+        <h2 style={{ color: 'var(--int-ink)' }}>Ajouter mes contrats en déposant mes AEM</h2>
+        <AemGuide />
+        <DocImport kind="aem" />
+      </section>
       <div className="row">
         <section className="card grow" data-tour="cal">
           <div className="pills">
@@ -240,7 +250,9 @@ function Intermittence() {
               <button className="btn dark" onClick={() => { setEditId(focusC.id); setDaysEditId(focusC.id); setFocus(null); }}>Modifier ce contrat</button>
             </section>
           )}
-          <section className="card dark" data-tour="form">
+          <details className="card toggle-manual" open={manualOpen} onToggle={(e) => setManualOpen((e.target as HTMLDetailsElement).open)} style={{ padding: '4px 16px' }}>
+          <summary>Ajouter un contrat à la main</summary>
+          <section className="card dark" data-tour="form" style={{ marginBottom: 12 }}>
             <div className="kv" style={{ alignItems: 'baseline' }}><h2 style={{ fontSize: 18 }}>Nouveau contrat</h2><button className="btn ghost sm" style={{ color: '#a9c3f7' }} onClick={() => { setSel([]); setAnchor(null); setRange({ from: '', to: '' }); }}>Effacer la sélection</button></div>
             <div style={{ background: 'var(--dark-2)', borderRadius: 12, padding: '10px 12px' }}>
               <strong>{nSel ? `${nSel} jour${nSel > 1 ? 's' : ''} sélectionné${nSel > 1 ? 's' : ''}` : 'Cliquez les jours travaillés'}</strong>
@@ -275,6 +287,7 @@ function Intermittence() {
             <label className="check"><input type="checkbox" checked={f.teaching} onChange={(e) => setF({ ...f, teaching: e.target.checked })} />Heures d'enseignement (établissement agréé)</label>
             <button className="btn primary" style={{ minHeight: 48 }} disabled={!canAdd} onClick={add}>Ajouter le contrat</button>
           </section>
+          </details>
         </aside>
       </div>
 
@@ -370,10 +383,17 @@ function RegimeGeneral() {
   };
 
   return (
+    <>
+    <section className="card" style={{ gap: 12, boxShadow: 'inset 4px 0 0 var(--chom)' }}>
+      <h2 style={{ color: 'var(--chom-ink)' }}>Mon chômage restant : déposez votre relevé de situation</h2>
+      <ReleveGuide />
+      <DocImport kind="releve" />
+    </section>
     <div className="row">
       <section className="card grow" style={{ boxShadow: 'inset 4px 0 0 var(--chom)' }}>
-        <h2 style={{ color: 'var(--chom-ink)' }}>Mon dernier relevé</h2>
-        <p className="small muted" style={{ margin: 0 }}>Recopiez le bloc « Informations sur vos droits au … » de votre dernier relevé de situation (espace France Travail › Mes échanges et documents). Les calculs repartent du relevé le plus récent.</p>
+        <details className="toggle-manual">
+        <summary>Saisir le relevé à la main</summary>
+        <p className="small muted" style={{ margin: 0 }}>Recopiez le bloc « Informations sur vos droits au … » de votre dernier relevé de situation. Les calculs repartent du relevé le plus récent.</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 10 }}>
           <label className="field">Jours restants<input inputMode="numeric" value={r.daysLeft} onChange={(e) => { setR({ ...r, daysLeft: e.target.value }); setSaved(false); }} /></label>
           <label className="field">au <span className="tiny muted" style={{ fontWeight: 400 }}>la date de « Informations sur vos droits au … », pas celle du courrier</span><input type="date" value={r.date} onChange={(e) => { setR({ ...r, date: e.target.value }); setSaved(false); }} /></label>
@@ -384,7 +404,8 @@ function RegimeGeneral() {
           <span><span className="tiny">Capital chômage restant</span><strong style={{ display: 'block', fontSize: 24 }}>{eur(cap)}</strong><span className="tiny">{num(r.daysLeft)} jours × {eur2(num(r.aj))} au {r.date ? fmtDay(toDay(r.date)) : '—'}</span></span>
           <button className="btn blue" onClick={save}>{saved ? 'Relevé enregistré ✓' : 'Enregistrer ce relevé'}</button>
         </div>
-        <h3 style={{ fontSize: 15 }}>Historique</h3>
+        </details>
+        <h3 style={{ fontSize: 15 }}>Mes relevés enregistrés</h3>
         <table className="ctable" style={{ minWidth: 0 }}>
           <thead><tr><th>Au</th><th className="num">Jours restants</th><th className="num">Allocation / jour</th><th className="num">SJR</th><th className="num">Capital</th><th /></tr></thead>
           <tbody>
@@ -447,6 +468,7 @@ function RegimeGeneral() {
         </section>
       </aside>
     </div>
+    </>
   );
 }
 
