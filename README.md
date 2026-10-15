@@ -10,9 +10,12 @@ que sous conditions (507 h sur 12 mois, et un droit intermittent au moins 30 % p
 qui vous reste). Cachet calcule **si** et **quand** vous pouvez le demander, mois par mois, et compare
 plusieurs stratégies (arrêter de travailler, sprint, un mois sur deux, cours, formation, ARCE…).
 
-> **Outil expérimental.** Testé sur de vrais dossiers France Travail et conçu pour être aussi fiable que
-> possible, il peut pourtant se tromper. Ses résultats sont une aide au calcul, pas un avis juridique :
-> seul France Travail décide de vos droits.
+> **Outil expérimental.** Testé avec **3 situations et documents réels** (une demande refusée, une demande
+> acceptée, une demande en cours), et conçu pour être aussi fiable que possible, il peut pourtant se tromper.
+> Ses résultats sont une aide au calcul, pas un avis juridique : seul France Travail décide de vos droits.
+>
+> **Aidez-moi à le fiabiliser pour le plus grand nombre** : si vous êtes concerné·e, contactez-moi (adresse
+> affichée en haut du site) pour tester l'outil avec vos documents.
 
 ## Ce que fait l'outil
 
@@ -112,6 +115,17 @@ src/examples/ huit dossiers fictifs qui illustrent chaque situation (tests)
   ci-dessus et un test.
 - Un nouveau format de document (AE-CS, Guso…) s'ajoute comme lecteur dans `src/domain/` et se branche
   dans `src/ui/DocImport.tsx`.
+
+## Et ensuite ?
+
+- **Vérifier avec plus de données et plus de situations.** Vous êtes concerné·e par le droit d'option, ou
+  vous avez déjà reçu une réponse de France Travail ? Contactez-moi (adresse affichée en haut du site) pour
+  m'aider à tester l'outil avec vos documents. Chaque dossier réel rend le calcul plus sûr pour tout le monde.
+- **Importer les bulletins de salaire**, quand les AEM auront disparu au profit de la DSN.
+- **Améliorer l'interface et l'expérience** : une application plus simple pour tout le monde, et un mode
+  pro pour celles et ceux qui veulent le détail des calculs.
+- **Calculer toutes les allocations intermittentes**, pas seulement le droit d'option : ouverture de droits,
+  renouvellement, montant mois par mois, franchises.
 
 ## Licence
 
