@@ -1,0 +1,9 @@
+# Déploiement par l'outil « Git Version Control » de cPanel (o2switch).
+# Ce fichier est placé à la racine de la branche « production » (le site compilé) par scripts/publish.sh.
+# cPanel l'exécute quand on clique « Deploy HEAD Commit » : il copie le site dans le dossier du sous-domaine.
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=$HOME/cachet.phileas.tv/
+    - /bin/mkdir -p $DEPLOYPATH
+    - /bin/cp -R assets index.html logo.svg robots.txt .htaccess $DEPLOYPATH
