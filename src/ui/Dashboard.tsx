@@ -1,3 +1,4 @@
+import { CONTACT_EMAIL } from '../config';
 import { useEffect, useMemo, useState } from 'react';
 import { addMonthsDay, fmtDay, fmtMonth, fromDay, monthKey, parts } from '../domain/dates';
 import type { MonthRow, Simulation } from '../domain/engine';
@@ -131,11 +132,11 @@ export function Dashboard() {
       {capped.length > 0 && (
         <div className="alert warn" role="status">
           <span className="small">
-            <strong>Plus de {capped[0].hoursCap} h dans un mois : {capped.map((M) => `${fmtMonth(M.y, M.m).toLowerCase()} (${Math.round(M.hours)} h, dont ${Math.round(M.hoursOverCap)} h non retenues)`).join(', ')}.</strong>{' '}
-            Pour les 507 h, France Travail ne retient en principe qu'un nombre d'heures limité par mois civil : 208 h pour un technicien (annexe 8),
-            250 h avec plusieurs employeurs dans le mois selon certaines sources, 28 cachets pour un artiste (annexe 10). L'outil applique ces plafonds :
-            les heures au-delà ne comptent pas, le salaire si. Ces seuils ne sont pas encore confirmés sur des cas réels : si vous êtes dans ce cas,
-            vérifiez auprès de France Travail, et vos retours aideront à fiabiliser la règle. Les plafonds se règlent dans Paramètres.
+            <strong>Vous dépassez {capped[0].hoursCap} h dans un mois : {capped.map((M) => `${fmtMonth(M.y, M.m).toLowerCase()} (${Math.round(M.hours)} h, dont ${Math.round(M.hoursOverCap)} h non retenues)`).join(', ')}.</strong>{' '}
+            Pour les 507 h, France Travail ne retient en principe qu'un nombre d'heures limité par mois : 208 h pour un technicien (annexe 8),
+            250 h avec plusieurs employeurs dans le mois selon certaines sources, 28 cachets pour un artiste (annexe 10).
+            L'outil applique ces plafonds, mais je n'ai encore jamais pu tester ce cas sur un vrai dossier. Si c'est votre situation,
+            pensez à vérifier auprès de France Travail{CONTACT_EMAIL ? <>, et écrivez-moi à <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: 'inherit', fontWeight: 700 }}>{CONTACT_EMAIL}</a> : vos documents m'aideront à fiabiliser l'outil pour tout le monde</> : ' : vos retours aideront à fiabiliser l’outil pour tout le monde'}.
           </span>
         </div>
       )}
