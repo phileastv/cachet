@@ -4,14 +4,22 @@
     {
       "name": "cachet",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 5180,
       "autoPort": true
     },
     {
       "name": "cachet-dist",
-      "runtimeExecutable": "node",
-      "runtimeArgs": ["/private/tmp/claude-502/-Users-phileas-Documents-droit-option-calculateur/125bc34b-6fa1-4b87-88b6-055629cdd43a/scratchpad/serve-dist.mjs"],
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "preview",
+        "--port",
+        "5181"
+      ],
       "port": 5181
     }
   ]
