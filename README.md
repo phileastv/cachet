@@ -49,6 +49,11 @@ Données d'exemple, fictives.
 
 ## Démarrer
 
+> **Note sur le développement.** Le code de Cachet a été écrit en grande partie avec l'aide d'une IA
+> (« vibe coding »). Les calculs, eux, ont été vérifiés avec soin sur de véritables dossiers France Travail
+> (relevés de situation, AEM, notifications et décisions réelles), et les règles sont sourcées dans le
+> tableau plus bas. Relectures et corrections bienvenues.
+
 ```bash
 npm install
 npm run dev      # http://localhost:5180
