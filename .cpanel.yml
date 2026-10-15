@@ -6,4 +6,4 @@ deployment:
   tasks:
     - export DEPLOYPATH=$HOME/cachet.phileas.tv/
     - /bin/mkdir -p $DEPLOYPATH
-    - /bin/cp -R assets index.html logo.svg robots.txt .htaccess $DEPLOYPATH
+    - /bin/cp -R assets index.html logo.svg og-image.png apple-touch-icon.png robots.txt sitemap.xml .htaccess $DEPLOYPATH
