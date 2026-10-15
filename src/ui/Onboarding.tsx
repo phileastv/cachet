@@ -1,13 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { APP_NAME, DONATE_URL, REPO_URL } from '../config';
 import { fromDay, monthStart, parts } from '../domain/dates';
 import { demoData } from '../domain/demo';
 import { go } from '../state/router';
-import { uid, useStore } from '../state/store';
+import { useStore } from '../state/store';
 import { eur, num } from './format';
 import { DocImport } from './DocImport';
 import { Logo } from './Icons';
 import { AemGuide, ReleveGuide } from './ImportGuides';
+import { FutureStep, optionVerdict } from './FutureStep';
+import type { AppData } from '../domain/types';
 
 const STEPS = [
   'Vous voulez devenir intermittent·e ?',
@@ -22,6 +24,7 @@ const STEPS = [
   'Un outil libre et gratuit',
   'Vos chiffres de chômage',
   'Vos contrats d’intermittent',
+  'Vos contrats à venir',
 ];
 
 export function Onboarding() {
@@ -31,14 +34,20 @@ export function Onboarding() {
   // Le bloc « Informations sur vos droits » d'un relevé est arrêté au dernier jour du mois précédent
   const releveCount = data.profile.releves.length;
   const aemCount = data.contracts.filter((c) => c.source?.kind === 'aem').length;
-  /** Avant-dernière étape : le relevé ; dernière : les AEM. */
-  const relStep = STEPS.length - 2;
+  /** Étapes de saisie : le relevé, les AEM, puis (seulement si le droit d'option ne passe pas encore) les contrats à venir. */
+  const relStep = STEPS.length - 3;
+  const aemStep = STEPS.length - 2;
   // Téléphone : écran étroit et pointeur tactile
   const phone = typeof window !== 'undefined' && window.matchMedia?.('(max-width: 760px) and (pointer: coarse)').matches;
   const [phoneOk, setPhoneOk] = useState(false);
   const [f, setF] = useState({ daysLeft: '', date: fromDay(monthStart(parts(today).y, parts(today).m) - 1), aj: '' });
 
-  const finish = (withDemo: boolean) => {
+  /** Les données, avec le relevé saisi à la main s'il y en a un. */
+  const withManual = useCallback((d: AppData): AppData => (num(f.aj) && !d.profile.releves.some((r) => r.date === f.date)
+    ? { ...d, profile: { ...d.profile, releves: [{ id: 'manuel', date: f.date, daysLeft: num(f.daysLeft), dailyAllowance: num(f.aj) }, ...d.profile.releves] } }
+    : d), [f]);
+
+  const finish = (withDemo: boolean, to?: string) => {
     if (withDemo) {
       update(() => demoData(today));
       go('/');
@@ -46,14 +55,21 @@ export function Onboarding() {
     }
     const imported = data.contracts.some((c) => c.source?.kind === 'aem');
     update((d) => ({
-      ...d,
+      ...withManual(d),
       onboarded: true,
-      profile: num(f.aj) ? { ...d.profile, releves: [{ id: uid(), date: f.date, daysLeft: num(f.daysLeft), dailyAllowance: num(f.aj) }] } : d.profile,
       // AEM déjà importées ici : la visite guidée de la page des contrats n'apprendrait plus rien
       toursSeen: imported ? [...new Set([...(d.toursSeen ?? []), 'contrats'])] : d.toursSeen,
     }));
     // Contrats importés : on va droit au résultat ; sinon, vers la saisie des contrats
-    go(imported ? '/' : '/contrats');
+    go(to ?? (imported ? '/' : '/contrats'));
+  };
+
+  /** Après les AEM : si le droit d'option passe déjà, on montre le résultat ; sinon, on propose de simuler la suite. */
+  const afterAem = () => {
+    const d = withManual(data);
+    if (!d.contracts.length) return finish(false, '/contrats');
+    if (!d.profile.releves.length || optionVerdict(d, today).req) return finish(false, '/');
+    setStep(last);
   };
 
   return (
@@ -103,7 +119,8 @@ export function Onboarding() {
               <span className="tiny muted">Tout reste dans votre navigateur, et le code de l'outil est libre. À l'étape suivante, déposez vos AEM : vos contrats se créent tout seuls.</span>
             </div>
           )}
-          {step === last && (
+          {step === last && <FutureStep onDone={(to) => finish(false, to)} withManual={withManual} />}
+          {step === aemStep && (
             <div className="card" style={{ gap: 12 }}>
               <strong>Le plus simple : déposez toutes vos AEM d'un coup</strong>
               <AemGuide />
@@ -118,9 +135,9 @@ export function Onboarding() {
           )}
           <div className="nav">
             {step > 0 && <button className="btn" style={{ minHeight: 52 }} onClick={() => setStep(step - 1)}>← Précédent</button>}
-            {step < last && <button className="btn dark" style={{ minHeight: 52, padding: '0 24px' }} onClick={() => setStep(step + 1)}>{step === 0 ? 'Comprendre pas à pas' : 'Suivant →'}</button>}
-            {step === last && <button className="btn primary" style={{ minHeight: 52, padding: '0 24px' }} onClick={() => finish(false)}>{aemCount ? 'Voir mon résultat →' : 'Continuer avec mes contrats →'}</button>}
-            {step === last && <button className="btn" style={{ minHeight: 52 }} onClick={() => finish(true)}>Essayer avec un exemple</button>}
+            {step < aemStep && <button className="btn dark" style={{ minHeight: 52, padding: '0 24px' }} onClick={() => setStep(step + 1)}>{step === 0 ? 'Comprendre pas à pas' : 'Suivant →'}</button>}
+            {step === aemStep && <button className="btn primary" style={{ minHeight: 52, padding: '0 24px' }} onClick={afterAem}>{data.contracts.length ? 'Voir mon résultat →' : 'Continuer avec mes contrats →'}</button>}
+            {step === aemStep && <button className="btn" style={{ minHeight: 52 }} onClick={() => finish(true)}>Essayer avec un exemple</button>}
             {step === 0 && <a className="btn ghost" href="#/sauvegarde">J'ai déjà une sauvegarde</a>}
           </div>
         </section>
@@ -188,10 +205,12 @@ function Body({ step }: { step: number }) {
           {REPO_URL && <a className="btn ghost" href={REPO_URL} target="_blank" rel="noreferrer">Voir le code source</a>}
         </div>
       </>;
+    case 12:
+      return <P>Avec les contrats que vous avez déjà faits, le droit d'option ne passe pas encore. C'est normal : il dépend aussi de vos <strong>prochains contrats</strong>. Simulons la suite.</P>;
     case 10:
       return <P>Déposez votre dernier relevé de situation France Travail (ou recopiez ses chiffres). Les calculs partiront de là, et vous pourrez le mettre à jour chaque mois.</P>;
     default:
-      return <P>Dernière étape : déposez vos AEM (attestations employeur) des 12 derniers mois. Vos contrats se créent tout seuls, avec les vrais jours travaillés et les vrais salaires.</P>;
+      return <P>Déposez vos AEM (attestations employeur) des 12 derniers mois. Vos contrats se créent tout seuls, avec les vrais jours travaillés et les vrais salaires.</P>;
   }
 }
 
