@@ -67,8 +67,8 @@ export function Onboarding() {
           <button className="btn sm" onClick={() => setPhoneOk(true)}>Compris</button>
         </div>
       )}
-      <main>
-        <section className="stage" aria-hidden="true"><Visual step={step} /></section>
+      <main className={step === last ? 'full' : undefined}>
+        {step !== last && <section className="stage" aria-hidden="true"><Visual step={step} /></section>}
         <section className="text">
           <span style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
             <span className="tiny muted" style={{ fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase' }}>Étape {step + 1} sur {STEPS.length}</span>
