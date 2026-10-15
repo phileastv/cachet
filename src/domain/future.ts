@@ -2,7 +2,7 @@
  * Contrats à venir, pour simuler la suite quand le droit d'option ne passe pas encore
  * avec les contrats connus. Ils sont marqués « simulés » et restent modifiables.
  */
-import { daysInMonth, fromDay, monthStart, parts, weekday } from './dates';
+import { daysInMonth, fromDay, monthStart, parts, toDay, weekday } from './dates';
 import { contractEnd, sortContracts } from './engine';
 import type { Annexe, Contract } from './types';
 
@@ -28,15 +28,31 @@ export function monthsFrom(day: number, n: number): { y: number; m: number; key:
   return monthsAfter(monthStart(p.y, p.m) - 1, n);
 }
 
-/** Recopie les contrats d'un mois passé (mêmes jours du mois) sur les mois donnés, sans aucun jour avant « after ». */
+/**
+ * Jour équivalent dans un autre mois : même jour de la semaine, même rang (le 2e mardi reste un 2e mardi),
+ * pour que les jours travaillés restent des jours de semaine. Rang absent ce mois-là (5e lundi) : le dernier.
+ */
+export function sameWeekdayIn(day: number, y: number, m: number): number {
+  const rank = Math.floor((parts(day).d - 1) / 7);
+  const first = monthStart(y, m);
+  let target = first + ((weekday(day) - weekday(first) + 7) % 7) + rank * 7;
+  // Pas de 5e lundi ce mois-là : on prend le dernier
+  while (target >= first + daysInMonth(y, m)) target -= 7;
+  return target;
+}
+
+/** Recopie les contrats d'un mois passé sur les mois donnés (décalés pour garder leurs jours de la semaine), sans aucun jour avant « after ». */
 export function copyMonthTo(contracts: Contract[], refKey: string, targets: { y: number; m: number }[], uid: () => string, after = -Infinity): Contract[] {
   const ref = contracts.filter((c) => !c.teaching && !c.training && c.days.some((d) => d.startsWith(refKey)));
   const out: Contract[] = [];
   for (const t of targets) {
-    const n = daysInMonth(t.y, t.m);
     for (const c of ref) {
       const inRef = c.days.filter((d) => d.startsWith(refKey));
-      const days = [...new Set(inRef.map((d) => Math.min(Number(d.slice(8, 10)), n)))].map((d) => monthStart(t.y, t.m) + d - 1).filter((d) => d > after).map(fromDay);
+      // Le contrat est décalé d'un bloc : son premier jour garde son jour de la semaine et son rang, les autres suivent
+      const firstRef = toDay([...inRef].sort()[0]);
+      const anchor = sameWeekdayIn(firstRef, t.y, t.m);
+      const monthEnd = monthStart(t.y, t.m) + daysInMonth(t.y, t.m) - 1;
+      const days = inRef.map((d) => anchor + (toDay(d) - firstRef)).filter((d) => d > after && d <= monthEnd).sort((a, b) => a - b).map(fromDay);
       if (!days.length) continue;
       const share = (inRef.length / c.days.length) * (days.length / inRef.length);
       out.push({

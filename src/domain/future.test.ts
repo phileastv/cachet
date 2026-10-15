@@ -14,18 +14,20 @@ describe('contrats à venir', () => {
   });
   it('recopie un mois passé sur les mois suivants, en contrats simulés', () => {
     const out = copyMonthTo(real, '2026-08', monthsAfter(toDay('2026-10-01'), 2), uid);
-    expect(out.map((x) => x.days)).toEqual([['2026-11-10', '2026-11-11', '2026-11-12', '2026-11-13'], ['2026-12-10', '2026-12-11', '2026-12-12', '2026-12-13']]);
+    // 10-13 août 2026 = du 2e lundi au 2e jeudi → 9-12 novembre, 14-17 décembre (jamais un week-end)
+    expect(out.map((x) => x.days)).toEqual([['2026-11-09', '2026-11-10', '2026-11-11', '2026-11-12'], ['2026-12-14', '2026-12-15', '2026-12-16', '2026-12-17']]);
+    expect(out.flatMap((x) => x.days).every((d) => weekday(toDay(d)) < 5)).toBe(true);
     expect(out.every((x) => x.simulated && x.hours === 32 && x.gross === 800)).toBe(true);
   });
   it('commence au mois en cours, sans jour avant la date donnée', () => {
     expect(monthsFrom(toDay('2026-10-15'), 2).map((x) => x.key)).toEqual(['2026-10', '2026-11']);
     const out = copyMonthTo(real, '2026-08', monthsFrom(toDay('2026-10-12'), 1), uid, toDay('2026-10-11'));
-    expect(out[0].days).toEqual(['2026-10-12', '2026-10-13']);
-    expect(out[0].hours).toBe(16);
+    expect(out[0].days).toEqual(['2026-10-12', '2026-10-13', '2026-10-14', '2026-10-15']);
+    expect(out[0].hours).toBe(32);
   });
   it('ne recopie que la part du mois d’un contrat à cheval', () => {
     const out = copyMonthTo(real, '2026-09', monthsAfter(toDay('2026-10-01'), 1), uid);
-    expect(out[0].days).toEqual(['2026-11-28', '2026-11-29', '2026-11-30']);
+    expect(out[0].days).toEqual(['2026-11-23', '2026-11-24', '2026-11-25']);
     expect(out[0].hours).toBe(24);
   });
   it('« environ N jours » : jours de semaine au rythme moyen', () => {

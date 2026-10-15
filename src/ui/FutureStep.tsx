@@ -20,8 +20,23 @@ const monthLabel = (key: string) => {
 
 type Mode = 'copy' | 'rough' | 'manual';
 
+/** Aperçu, mois par mois, des contrats qui seront simulés (en violet). */
+function SimPreview({ contracts }: { contracts: Contract[] }) {
+  const keys = [...new Set(contracts.flatMap((c) => c.days.map((d) => d.slice(0, 7))))].sort();
+  if (!keys.length) return null;
+  const days = new Set(contracts.flatMap((c) => c.days)).size;
+  const hours = contracts.reduce((a, c) => a + c.hours, 0);
+  const gross = contracts.reduce((a, c) => a + c.gross, 0);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="small"><span className="sim-dot" /> Mois simulés : <strong>{keys.length} mois</strong>, {days} jours, {Math.round(hours)} h, {eur(gross)} brut au total.</span>
+      <div className="sim-grid">{keys.map((k) => <MiniMonth key={k} contracts={contracts} monthKey={k} sim small />)}</div>
+    </div>
+  );
+}
+
 /** Mini-calendrier d'un mois passé : jours travaillés, heures, jours et salaire brut du mois. */
-function MiniMonth({ contracts, monthKey }: { contracts: Contract[]; monthKey: string }) {
+function MiniMonth({ contracts, monthKey, sim = false, small = false }: { contracts: Contract[]; monthKey: string; sim?: boolean; small?: boolean }) {
   const [y, m] = monthKey.split('-').map(Number);
   const first = monthStart(y, m - 1);
   const n = daysInMonth(y, m - 1);
@@ -42,7 +57,8 @@ function MiniMonth({ contracts, monthKey }: { contracts: Contract[]; monthKey: s
   const gross = [...perDay.values()].reduce((a, x) => a + x.gross, 0);
   const lead = weekday(first);
   return (
-    <div className="mini-month">
+    <div className={`mini-month${sim ? ' sim' : ''}${small ? ' small' : ''}`}>
+      {small && <strong className="mini-title">{monthLabel(monthKey)}</strong>}
       <div className="mini-cal" role="img" aria-label={`${perDay.size} jours travaillés en ${monthLabel(monthKey)}`}>
         {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => <b key={i}>{d}</b>)}
         {Array.from({ length: lead }, (_, i) => <span key={`l${i}`} />)}
@@ -52,8 +68,8 @@ function MiniMonth({ contracts, monthKey }: { contracts: Contract[]; monthKey: s
         })}
       </div>
       <div className="mini-stats">
-        <span><strong>{perDay.size}</strong> jours travaillés</span>
-        <span><strong>{Math.round(hours)}</strong> heures</span>
+        <span><strong>{perDay.size}</strong> {small ? 'j' : 'jours travaillés'}</span>
+        <span><strong>{Math.round(hours)}</strong> {small ? 'h' : 'heures'}</span>
         <span><strong>{eur(gross)}</strong> brut</span>
       </div>
     </div>
@@ -78,6 +94,9 @@ export function FutureStep({ onDone, withManual }: { onDone: (to: string) => voi
   const [days, setDays] = useState<Record<string, string>>({});
   const [perDay, setPerDay] = useState({ gross: rate ? String(Math.round(rate.gross)) : '', hours: rate ? String(Math.round(rate.hours * 10) / 10).replace('.', ',') : '8' });
 
+  const fake = () => 'apercu';
+  const copyPreview = useMemo(() => (ref ? copyMonthTo(base.contracts, ref, months.slice(0, count), fake, from) : []), [base.contracts, ref, count, from]);
+  const roughPreview = roughMonths(months.slice(0, 6).map((mm) => ({ y: mm.y, m: mm.m, days: Math.round(num(days[mm.key] ?? '')) })), { gross: num(perDay.gross), hours: num(perDay.hours) || 8 }, data.profile.annexe, fake, from);
   const before = useMemo(() => optionVerdict(withManual(base), today), [base, today, withManual]);
   const after = useMemo(() => (added.length ? optionVerdict(withManual(data), today) : null), [added, data, today, withManual]);
 
@@ -113,6 +132,7 @@ export function FutureStep({ onDone, withManual }: { onDone: (to: string) => voi
             </label>
           </div>
           {ref && <MiniMonth contracts={base.contracts} monthKey={ref} />}
+          {ref && <SimPreview contracts={copyPreview} />}
           <button className="btn primary" style={{ alignSelf: 'flex-start' }} disabled={!ref} onClick={() => apply(copyMonthTo(base.contracts, ref, months.slice(0, count), uid, from))}>Simuler ces mois</button>
         </div>
       )}
@@ -139,6 +159,7 @@ export function FutureStep({ onDone, withManual }: { onDone: (to: string) => voi
               </label>
             ))}
           </div>
+          <SimPreview contracts={roughPreview} />
           <button className="btn primary" style={{ alignSelf: 'flex-start' }} disabled={!num(perDay.gross) || !months.slice(0, 6).some((m) => num(days[m.key] ?? '') > 0)}
             onClick={() => apply(roughMonths(months.slice(0, 6).map((m) => ({ y: m.y, m: m.m, days: Math.round(num(days[m.key] ?? '')) })), { gross: num(perDay.gross), hours: num(perDay.hours) || 8 }, data.profile.annexe, uid, from))}>
             Simuler ces mois

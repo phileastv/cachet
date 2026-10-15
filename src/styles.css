@@ -401,3 +401,18 @@ table.data td.mark-known { background: var(--chom-bg) !important; color: var(--c
 .mini-cal span.on { background: var(--int); color: #fff; font-weight: 800; }
 .mini-stats { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
 .mini-stats strong { font-size: 20px; color: var(--int-ink); margin-right: 4px; }
+/* Mois simulés : violet */
+:root { --sim: #7b5cd6; --sim-bg: #efeafd; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --sim: #a58bf0; --sim-bg: #2a2342; } }
+:root[data-theme="dark"] { --sim: #a58bf0; --sim-bg: #2a2342; }
+.mini-month.sim { background: var(--sim-bg); }
+.mini-month.sim .mini-cal span.on { background: var(--sim); }
+.mini-month.sim .mini-stats strong { color: var(--sim); }
+.mini-month.small { flex-direction: column; align-items: flex-start; gap: 6px; padding: 8px; }
+.mini-month.small .mini-cal { grid-template-columns: repeat(7, 18px); gap: 2px; font-size: 9px; }
+.mini-month.small .mini-cal span { height: 16px; line-height: 16px; border-radius: 4px; }
+.mini-month.small .mini-stats { flex-direction: row; flex-wrap: wrap; gap: 8px; font-size: 11px; }
+.mini-month.small .mini-stats strong { font-size: 13px; }
+.mini-title { font-size: 12px; text-transform: capitalize; color: var(--sim); }
+.sim-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.sim-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; background: var(--sim); vertical-align: middle; }
