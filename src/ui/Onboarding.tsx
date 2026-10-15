@@ -82,7 +82,7 @@ export function Onboarding() {
               style={{ width: i === step ? 34 : 10, background: i <= step ? 'var(--ink)' : 'var(--line)' }} />
           ))}
         </div>
-        {data.onboarded ? <a href="#/" className="btn ghost">Retour au tableau de bord</a> : <button className="btn ghost" onClick={() => setStep(last)}>Passer l'explication</button>}
+        {data.onboarded ? <a href="#/" className="btn ghost">Retour au tableau de bord</a> : <button className="btn ghost" onClick={() => setStep(relStep)}>Passer l'explication</button>}
       </header>
 
       {phone && step === 0 && !phoneOk && (
@@ -137,7 +137,7 @@ export function Onboarding() {
             {step > 0 && <button className="btn" style={{ minHeight: 52 }} onClick={() => setStep(step - 1)}>← Précédent</button>}
             {step < aemStep && <button className="btn dark" style={{ minHeight: 52, padding: '0 24px' }} onClick={() => setStep(step + 1)}>{step === 0 ? 'Comprendre pas à pas' : 'Suivant →'}</button>}
             {step === aemStep && <button className="btn primary" style={{ minHeight: 52, padding: '0 24px' }} onClick={afterAem}>{data.contracts.length ? 'Voir mon résultat →' : 'Continuer avec mes contrats →'}</button>}
-            {step === aemStep && <button className="btn" style={{ minHeight: 52 }} onClick={() => finish(true)}>Essayer avec un exemple</button>}
+            {(step === relStep || step === aemStep) && <button className="btn" style={{ minHeight: 52 }} onClick={() => finish(true)}>Ne rien renseigner : essayer avec un exemple</button>}
             {step === 0 && <a className="btn ghost" href="#/sauvegarde">J'ai déjà une sauvegarde</a>}
           </div>
         </section>

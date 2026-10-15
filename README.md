@@ -1,6 +1,6 @@
 # Cachet · calculateur du droit d'option intermittent
 
-**En ligne : https://cachet.phileas.tv** (adresse secondaire : https://intermittent.phileas.tv)
+**En ligne : https://cachet.phileas.tv**
 
 Vous êtes au chômage au régime général et vous enchaînez des contrats d'intermittent du spectacle ?
 Pour passer intermittent·e, il faut demander le **droit d'option** à France Travail, et il n'est accordé
