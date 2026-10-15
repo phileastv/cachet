@@ -14,8 +14,9 @@ npm run build
 cp deploy/.cpanel.yml dist/.cpanel.yml
 
 # Commit du contenu de dist/ sur « production », sans toucher au dossier de travail ni à l'index
-INDEX=$(mktemp)
-trap 'rm -f "$INDEX"' EXIT
+TMPDIR_INDEX=$(mktemp -d)
+INDEX="$TMPDIR_INDEX/index"
+trap 'rm -rf "$TMPDIR_INDEX"' EXIT
 GIT_INDEX_FILE="$INDEX" git --work-tree=dist add -A -f .
 TREE=$(GIT_INDEX_FILE="$INDEX" git write-tree)
 PARENT=$(git rev-parse -q --verify refs/heads/production || true)
