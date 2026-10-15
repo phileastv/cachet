@@ -90,17 +90,26 @@ sur la branche `production` (le site compilé et `.cpanel.yml`, rien d'autre), p
 | Reliquat comparé = jours restants × (AJ brute − 3 % du SJR) quand le SJR est connu | `rules.ts` | Annexes VIII/X art. 26 §2 → règlement général art. 14 à 19 |
 | AJ intermittente = A + B + C (annexe 8 / 10), tronquée au centime, planchers 38 € / 44 €, plafond 174,80 € | `rules.ts` | Unédic, annexes 8 et 10 ; contrôlé sur deux AJ réelles (60,48 € et 57,71 €) |
 | Heures d'enseignement plafonnées (70 h, 120 h à 50 ans et plus) | `engine.ts` | francetravail.fr/spectacle |
+| Heures retenues plafonnées par mois civil : 208 h (annexe 8), 250 h avec plusieurs employeurs, 28 cachets (annexe 10) ; le salaire reste entier ; avertissement affiché au-delà | `engine.ts` | **Règle floue, à confirmer** (voir ci-dessous) |
 | ARCE : part du reliquat (60 % si fin de contrat au 1/07/2023 ou après, 45 % avant — paramètre), arrêt du versement mensuel | `engine.ts` | Décret 2023-33 |
 
 Toutes les valeurs sont modifiables dans Paramètres. Si la réglementation change, corrigez la valeur
 et ouvrez une issue ou une PR.
 
-**Limites connues** : plafond mensuel de 208 h, salaires hors spectacle (qui réduisent le chômage sans
+**Limites connues** : salaires hors spectacle (qui réduisent le chômage sans
 compter pour l'intermittence), carence et différés du régime général avant le premier relevé, indemnisation
 intermittente après l'ouverture, neutralisation maladie et heures de formation non modélisés. Deux règles
 reposent sur une lecture du règlement non encore confirmée par une décision réelle sur un cas limite :
 le reliquat comparé après retenue retraite, et le délai d'attente « déjà appliqué ». Un écart entre 25 et
 35 % doit être considéré comme incertain : attendez le tableau comparatif de France Travail.
+
+**Le plafond mensuel d'heures est une règle floue.** Les 208 h par mois civil pour un technicien (annexe 8)
+sont citées par plusieurs sources, mais nous n'avons trouvé ni le texte officiel en vigueur qui les fixe, ni
+de confirmation sur la variante à 250 h quand le mois compte plusieurs employeurs (un seul calculateur tiers
+la mentionne ; un document syndical de 2014 évoque plutôt 260 h sur dérogation), ni sur le plafond de
+28 cachets par mois en annexe 10. Aucun des dossiers réels testés ne dépassait 208 h dans un mois.
+L'outil applique donc ces plafonds, réglables dans Paramètres, et affiche un avertissement dès qu'un mois
+les dépasse. Si vous êtes dans ce cas, vos documents nous aideront à fixer la bonne règle.
 
 Les AEM sont progressivement remplacées (DSN, « AE-CS ») : voir [docs/recherche-fin-aem.md](docs/recherche-fin-aem.md).
 

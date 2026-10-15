@@ -21,6 +21,9 @@ const FIELDS: [keyof Rules, string, string][] = [
   ['ajMax', 'Plafond allocation intermittente', '€ / jour'],
   ['intermittentPeriodDays', 'Durée du droit intermittent', 'jours'],
   ['smicHourly', 'SMIC horaire brut', '€, pour la franchise salaires'],
+  ['monthlyHoursCap', 'Heures retenues au plus par mois (annexe 8)', 'h par mois civil, 0 = pas de plafond (à confirmer)'],
+  ['monthlyHoursCapMulti', 'Idem avec plusieurs employeurs dans le mois', 'h par mois civil (non confirmé)'],
+  ['monthlyCachetsCap', 'Cachets retenus au plus par mois (annexe 10)', 'cachets de 12 h, 0 = pas de plafond'],
   ['teachingCap', 'Plafond heures d’enseignement', 'h (moins de 50 ans)'],
   ['teachingCap50', 'Plafond heures d’enseignement à 50 ans et plus', 'h'],
 ];

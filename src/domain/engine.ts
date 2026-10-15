@@ -1,4 +1,4 @@
-import { daysInMonth, monthKey, monthStart, parts, toDay } from './dates';
+import { daysInMonth, fromDay, monthKey, monthStart, parts, toDay } from './dates';
 import { indemnifiableDays, intermittentBreakdown, paidLeaveFranchise, reliquatAllowance, salaryFranchise, type AJBreakdown } from './rules';
 import type { Contract, Profile, Releve, Rules } from './types';
 
@@ -89,6 +89,12 @@ export interface MonthRow {
   capStartDays: number;
   capEndDays: number;
   hoursEnd: number;
+  /** Heures de travail du mois au-delà du plafond mensuel, non retenues pour les 507 h (0 si aucune). */
+  hoursOverCap: number;
+  /** Plafond appliqué ce mois-là (heures). */
+  hoursCap: number;
+  /** Nombre d'employeurs distincts du mois. */
+  employers: number;
   /** Salaire brut des 12 derniers mois, à la fin du mois. */
   grossEnd: number;
   presumedEnd: Presumed | null;
@@ -218,6 +224,45 @@ export function simulate(input: SimInput): Simulation {
     }
   }
 
+  // Plafond mensuel des heures retenues : par mois civil, les heures de travail au-delà de 208 h (annexe 8,
+  // 250 h avec plusieurs employeurs) ou de 28 cachets (annexe 10) ne comptent pas pour les 507 h.
+  // Le salaire, lui, reste entier. Règle à confirmer sur des cas réels : les plafonds sont des paramètres.
+  const employerOf = (c: Contract) => (c.employer || c.title.split(/ · | \(/)[0]).trim().toLowerCase();
+  const capInfo = new Map<string, { over: number; cap: number; employers: number }>();
+  {
+    const byMonth = new Map<string, { i: number[]; employers: Set<string> }>();
+    for (const c of contracts) {
+      if (c.teaching || c.training) continue;
+      for (const iso of c.days) {
+        const k = iso.slice(0, 7);
+        const m = byMonth.get(k) ?? { i: [], employers: new Set<string>() };
+        m.employers.add(employerOf(c));
+        byMonth.set(k, m);
+      }
+    }
+    for (let i = 0; i < L; i++) {
+      if (!h8[i] && !h10[i]) continue;
+      byMonth.get(fromDay(i + base).slice(0, 7))?.i.push(i);
+    }
+    for (const [k, m] of byMonth) {
+      const multi = m.employers.size > 1;
+      const cap8 = multi ? rules.monthlyHoursCapMulti || rules.monthlyHoursCap : rules.monthlyHoursCap;
+      const cap10 = rules.monthlyCachetsCap ? rules.monthlyCachetsCap * 12 : 0;
+      const t8 = m.i.reduce((a, i) => a + h8[i], 0);
+      const t10 = m.i.reduce((a, i) => a + h10[i], 0);
+      let over = 0;
+      if (cap8 && t8 > cap8 + 1e-9) {
+        for (const i of m.i) h8[i] *= cap8 / t8;
+        over += t8 - cap8;
+      }
+      if (cap10 && t10 > cap10 + 1e-9) {
+        for (const i of m.i) h10[i] *= cap10 / t10;
+        over += t10 - cap10;
+      }
+      capInfo.set(k, { over: Math.round(over * 100) / 100, cap: t10 > t8 ? cap10 : cap8, employers: m.employers.size });
+    }
+  }
+
   // Sommes sur les 365 jours qui finissent au jour i (au jour près : un contrat à cheval ne compte que pour ses jours dans la fenêtre)
   const rolling = (a: ArrayLike<number>) => {
     const out = new Float64Array(L);
@@ -327,11 +372,13 @@ export function simulate(input: SimInput): Simulation {
     }));
     months.push({
       key: monthKey(y, m), y, m, start: d, n, cells, contracts: inMonth,
-      gross: g, hours: h, workedDays: wd, aj, indemDays, unpaidDays: off, full, raw, plafondHit: capped < raw,
+      gross: g, hours: h + (capInfo.get(monthKey(y, m))?.over ?? 0), workedDays: wd, aj, indemDays, unpaidDays: off, full, raw, plafondHit: capped < raw,
       // Jours payés arrondis à l'entier le plus proche (Unédic, fiche « Cumul »)
       paidDays: aj ? Math.min(indemDays, Math.round(capped / aj + 1e-9)) : 0, paid: 0,
       capStart: 0, capEnd: 0, capStartDays: 0, capEndDays: 0,
-      hoursEnd: winH[d + n - 1 - base], grossEnd: winG[d + n - 1 - base], presumedEnd: null, ecartEnd: null, status: 'hours', tight: false,
+      hoursEnd: winH[d + n - 1 - base], grossEnd: winG[d + n - 1 - base],
+      hoursOverCap: capInfo.get(monthKey(y, m))?.over ?? 0, hoursCap: capInfo.get(monthKey(y, m))?.cap ?? rules.monthlyHoursCap,
+      employers: capInfo.get(monthKey(y, m))?.employers ?? 0, presumedEnd: null, ecartEnd: null, status: 'hours', tight: false,
       hasSimulated: inMonth.some((c) => c.simulated && !c.generated),
       hasGenerated: inMonth.some((c) => c.generated), arce: 0,
     });

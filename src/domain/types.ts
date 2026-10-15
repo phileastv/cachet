@@ -18,6 +18,8 @@ export interface Contract {
   training?: boolean;
   /** Contrat fictif généré par un scénario (jamais enregistré). */
   generated?: boolean;
+  /** Employeur (rempli par l'import des AEM) : sert à savoir si un mois compte plusieurs employeurs. */
+  employer?: string;
   /** Contrat créé par l'import d'une AEM (numéro d'attestation, pour éviter les doublons). */
   source?: { kind: 'aem' | 'aem-pending'; ref: string };
 }
@@ -93,6 +95,11 @@ export interface Rules {
   retirementFloor: number;
   /** Part du reliquat versée par l'ARCE (60 % si fin de contrat au 1/07/2023 ou après, 45 % avant). */
   arceRate: number;
+  /** Heures retenues au plus par mois civil, annexe 8 (un employeur / plusieurs employeurs). 0 = pas de plafond. */
+  monthlyHoursCap: number;
+  monthlyHoursCapMulti: number;
+  /** Cachets retenus au plus par mois civil, annexe 10 (× 12 h). 0 = pas de plafond. */
+  monthlyCachetsCap: number;
   /** Écart au-dessus du seuil sous lequel la marge est jugée trop faible (ex. 0,05 = 5 points). */
   safetyMargin: number;
   /** Plafond de l'allocation journalière intermittente. */

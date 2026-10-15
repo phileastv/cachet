@@ -111,11 +111,31 @@ describe('période de référence et demandes', () => {
   });
   it('fenêtre de 365 jours au jour près : un contrat à cheval ne compte que pour ses jours dedans', () => {
     // FCT le 30/06/2026 → période du 01/07/2025 au 30/06/2026 ; le premier contrat a 5 jours sur 10 dedans
-    const sim = run([contract('a', '2025-06-26', '2025-07-05', 100, 3000), contract('b', '2026-06-21', '2026-06-30', 500, 15_000)]);
+    const sim = run([contract('a', '2025-06-26', '2025-07-05', 100, 3000), contract('b', '2026-03-01', '2026-06-30', 500, 15_000)]);
     expect(sim.requestInfo(toDay('2026-07-01')).hours).toBe(550);
     // Un contrat fini 365 jours avant la FCT ne compte plus
-    const sim2 = run([contract('a', '2025-06-21', '2025-06-30', 100, 3000), contract('b', '2026-06-21', '2026-06-30', 500, 15_000)]);
+    const sim2 = run([contract('a', '2025-06-21', '2025-06-30', 100, 3000), contract('b', '2026-03-01', '2026-06-30', 500, 15_000)]);
     expect(sim2.requestInfo(toDay('2026-07-01')).hours).toBe(500);
+  });
+  it('plafond mensuel : 208 h retenues au plus par mois civil, 250 h avec plusieurs employeurs', () => {
+    // 22 jours à 11 h en juin = 242 h : 34 h non retenues avec un seul employeur
+    const juin = contract('a', '2026-06-01', '2026-06-22', 242, 6000);
+    const sim = run([{ ...juin, employer: 'Production A' }]);
+    const M = sim.months.find((m) => m.key === '2026-06')!;
+    expect(M.hoursOverCap).toBe(34);
+    expect(M.hoursCap).toBe(208);
+    expect(sim.requestInfo(toDay('2026-06-23')).hours).toBe(208);
+    expect(sim.requestInfo(toDay('2026-06-23')).sr).toBe(6000); // le salaire reste entier
+    // Deux employeurs dans le mois : plafond de 250 h, rien n'est écrêté
+    const two = run([{ ...contract('a', '2026-06-01', '2026-06-11', 121, 3000), employer: 'Production A' }, { ...contract('b', '2026-06-12', '2026-06-22', 121, 3000), employer: 'Production B' }]);
+    expect(two.months.find((m) => m.key === '2026-06')!.hoursOverCap).toBe(0);
+    expect(two.requestInfo(toDay('2026-06-23')).hours).toBe(242);
+  });
+  it('plafond mensuel en annexe 10 : 28 cachets (336 h)', () => {
+    const artiste: Contract = { ...contract('a', '2026-06-01', '2026-06-30', 30 * 12, 9000), annexe: '10' };
+    const sim = run([artiste]);
+    expect(sim.months.find((m) => m.key === '2026-06')!.hoursOverCap).toBe(24);
+    expect(sim.requestInfo(toDay('2026-07-01')).hours).toBe(336);
   });
   it('les heures d’enseignement comptent pour les 507 h, pas dans la partie B de l’AJ', () => {
     const teach: Contract = { ...contract('t', '2026-05-01', '2026-05-10', 70, 0), teaching: true };

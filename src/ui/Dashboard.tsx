@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { addMonthsDay, fmtDay, fromDay, monthKey, parts } from '../domain/dates';
+import { addMonthsDay, fmtDay, fmtMonth, fromDay, monthKey, parts } from '../domain/dates';
 import type { MonthRow, Simulation } from '../domain/engine';
 import { DEFAULT_PARAMS, pattern, runScenarios, type ScenarioId, type ScenarioParams, type ScenarioResult } from '../domain/scenarios';
 import { useStore } from '../state/store';
@@ -35,6 +35,8 @@ export function Dashboard() {
   const results = useMemo(() => runScenarios(data, today, params), [data, today, params]);
   const sel = results.find((r) => r.id === scen) ?? results[0];
   const sim = sel.sim;
+  // Mois (réels ou simulés) où les heures dépassent le plafond mensuel retenu pour les 507 h
+  const capped = sim.months.filter((M) => M.hoursOverCap > 0 && !M.hasGenerated);
   const cursor = Math.min(Math.max(hover ?? day, sim.start), sim.end);
   const state = sim.at(cursor);
   const info = sim.requestInfo(cursor);
@@ -122,6 +124,18 @@ export function Dashboard() {
           <span className="nav">
             <a className="btn blue" href="#/contrats/regime">Ajouter le relevé</a>
             <button className="btn ghost" onClick={() => update((d) => ({ ...d, releveReminderDismissed: curKey }))}>Plus tard</button>
+          </span>
+        </div>
+      )}
+
+      {capped.length > 0 && (
+        <div className="alert warn" role="status">
+          <span className="small">
+            <strong>Plus de {capped[0].hoursCap} h dans un mois : {capped.map((M) => `${fmtMonth(M.y, M.m).toLowerCase()} (${Math.round(M.hours)} h, dont ${Math.round(M.hoursOverCap)} h non retenues)`).join(', ')}.</strong>{' '}
+            Pour les 507 h, France Travail ne retient en principe qu'un nombre d'heures limité par mois civil : 208 h pour un technicien (annexe 8),
+            250 h avec plusieurs employeurs dans le mois selon certaines sources, 28 cachets pour un artiste (annexe 10). L'outil applique ces plafonds :
+            les heures au-delà ne comptent pas, le salaire si. Ces seuils ne sont pas encore confirmés sur des cas réels : si vous êtes dans ce cas,
+            vérifiez auprès de France Travail, et vos retours aideront à fiabiliser la règle. Les plafonds se règlent dans Paramètres.
           </span>
         </div>
       )}
@@ -299,7 +313,7 @@ function MonthLine({ M, sim, cursor, today, open, onToggle, onPick, onHover }: {
           </div>
           <div className="chombar"><i style={{ width: `${Math.round((M.paidDays / M.indemDays) * 100)}%` }} /></div>
         </div>
-        <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}><strong>{Math.round(M.hours)} h</strong><span className="tiny muted">{eur(M.gross)} brut</span></span>
+        <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}><strong>{Math.round(M.hours)} h</strong><span className="tiny muted">{eur(M.gross)} brut</span>{M.hoursOverCap > 0 && <span className="tiny" style={{ color: 'var(--warn-ink)', fontWeight: 700 }} title={`Au-delà de ${M.hoursCap} h dans le mois, les heures ne comptent pas pour les 507 h (règle à confirmer).`}>{Math.round(M.hoursOverCap)} h non retenues</span>}</span>
         <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}><strong style={{ color: 'var(--chom-ink)' }}>{M.arce ? `ARCE ${eur(M.arce)}` : eur(M.paid)}</strong><span className="tiny muted">{M.paidDays} j payés sur {M.indemDays}</span></span>
         <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2 }}>{statusBadge(M)}</span>
       </div>
@@ -325,6 +339,7 @@ function MonthLine({ M, sim, cursor, today, open, onToggle, onPick, onHover }: {
           </div>
           <div style={{ background: 'var(--card-2)' }}>
             <strong>Droit d'option · fin de mois</strong>
+            {M.hoursOverCap > 0 && <div className="kv tiny" style={{ color: 'var(--warn-ink)' }}><span>Heures du mois au-delà de {M.hoursCap} h (non retenues)</span><strong>{Math.round(M.hoursOverCap)} h</strong></div>}
             <div className="kv"><span>Heures sur 12 mois</span><strong>{Math.round(M.hoursEnd)} / 507 h</strong></div>
             <div className="kv"><span>Allocation intermittente estimée</span><strong>{M.presumedEnd ? `${M.presumedEnd.aj.toFixed(2).replace('.', ',')} €/j` : '—'}</strong></div>
             <div className="kv"><span>Droit intermittent comparé</span><strong>{M.presumedEnd ? eur(M.presumedEnd.global) : '—'}</strong></div>

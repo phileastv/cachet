@@ -228,7 +228,7 @@ export function aemContracts(list: ParsedAem[], uid: () => string, fallbackAnnex
     if (!days.length) continue;
     out.push({
       id: uid(), title: `${a.employer || 'Employeur'}${a.job ? ` · ${a.job.toLowerCase()}` : ''} (AEM ${a.month.slice(5)}/${a.month.slice(0, 4)})`,
-      days, hours: a.hours ?? 0, gross: a.grossSubject ?? a.gross ?? 0, annexe: a.annexe ?? fallbackAnnexe, simulated: false,
+      days, hours: a.hours ?? 0, gross: a.grossSubject ?? a.gross ?? 0, annexe: a.annexe ?? fallbackAnnexe, simulated: false, employer: a.employer || undefined,
       source: { kind: 'aem', ref: a.ref },
     });
   }

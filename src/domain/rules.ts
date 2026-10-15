@@ -36,6 +36,11 @@ export const DEFAULT_RULES: Rules = {
   arceRate: 0.6,
   safetyMargin: 0.05,
   ajMax: 174.8,
+  // Plafond mensuel des heures retenues pour les 507 h : 208 h en annexe 8 (250 h avec plusieurs employeurs
+  // selon un calculateur tiers, non confirmé), 28 cachets en annexe 10. À ajuster avec des cas réels.
+  monthlyHoursCap: 208,
+  monthlyHoursCapMulti: 250,
+  monthlyCachetsCap: 28,
 };
 
 /** Détail du calcul de l'allocation journalière intermittente (A + B + C). */
