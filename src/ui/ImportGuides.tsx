@@ -27,28 +27,21 @@ const Envelope = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
 );
 
-/** Récupérer le dernier relevé de situation dans l'espace France Travail. */
+/** Page « Mes courriers reçus » de l'espace France Travail (connexion demandée si besoin). */
+export const FT_COURRIERS_URL = 'https://candidat.francetravail.fr/mescourriers/';
+
+/** Récupérer le dernier relevé de situation dans l'espace France Travail : 2 étapes. */
 export function ReleveGuide({ compact = false }: { compact?: boolean }) {
   return (
     <ol className={`guide${compact ? ' compact' : ''}`}>
-      <Step n={1} title="Allez sur votre espace France Travail" mock={
-        <Browser url="francetravail.fr">
-          <div className="mock-head"><b>Mon espace personnel</b></div>
-          <div className="mock-tabs"><span className="on">Accueil</span><span>Mon projet</span><span>Inscription et allocations</span></div>
-          <div className="mock-cards"><span /><span /></div>
-        </Browser>
-      }>Connectez-vous sur francetravail.fr (ou l'appli « Mon espace »).</Step>
-      <Step n={2} title={<>Ouvrez vos courriers reçus : la petite enveloppe <span className="guide-icon"><Envelope size={14} /></span> en haut à droite</>} mock={
-        <Browser url="francetravail.fr">
-          <div className="mock-top">
-            <span className="mock-btn" />
-            <span className="mock-btn hl"><Envelope /></span>
-            <span className="mock-user" />
-          </div>
-          <div className="mock-arrow">↑ Mes courriers reçus</div>
-        </Browser>
-      }>Ou : Échanges et documents › Mes courriers reçus.</Step>
-      <Step n={3} title={<>Téléchargez le dernier « Relevé de situation », puis déposez-le ici</>} mock={
+      <Step n={1} title="Ouvrez vos courriers France Travail (bouton ci-dessus)" mock={
+        <a className="guide-cta" href={FT_COURRIERS_URL} target="_blank" rel="noopener noreferrer">
+          <Envelope size={22} />
+          <span>Cliquez ici pour ouvrir votre espace France Travail<small>directement sur « Mes courriers reçus » · nouvel onglet</small></span>
+          <b aria-hidden="true" className="guide-cta-arrow">→</b>
+        </a>
+      }>Connectez-vous si on vous le demande : vous arrivez sur la liste de vos courriers.</Step>
+      <Step n={2} title={<>Téléchargez le dernier « Relevé de situation », puis déposez-le ici</>} mock={
         <Browser url="francetravail.fr · Mes courriers reçus">
           <div className="mock-row hl"><Envelope /><span><b>Relevé de situation</b><small>le plus récent, en haut</small></span><em>Consulter</em></div>
           <div className="mock-row"><Envelope /><span><b>Relevé de situation</b><small>le mois d'avant</small></span><em>Consulter</em></div>

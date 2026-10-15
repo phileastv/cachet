@@ -374,6 +374,9 @@ function RegimeGeneral() {
   const setProfile = (p: Partial<typeof data.profile>) => update((d) => ({ ...d, profile: { ...d.profile, ...p } }));
   const [pr, setPr] = useState({ date: '', fct: '' });
   const [up, setUp] = useState({ from: '', to: '', reason: '' });
+  const autoCeiling = last?.sjr ? Math.round(last.sjr * 30.42 * 100) / 100 : null;
+  const unpaidList = [...(data.profile.unpaidPeriods ?? [])].sort((a, b) => (a.from < b.from ? -1 : 1));
+  const unpaidFromReleve = unpaidList.filter((u) => u.fromReleve).length;
 
   const save = () => {
     if (!(num(r.daysLeft) >= 0) || !num(r.aj)) return;
@@ -416,10 +419,16 @@ function RegimeGeneral() {
             {!releves.length && <tr><td colSpan={6} className="muted">Aucun relevé pour l'instant.</td></tr>}
           </tbody>
         </table>
-        <h3 style={{ fontSize: 15 }}>Mon profil</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10 }}>
-          <label className="field">Plafond du cumul salaire + chômage (€/mois) <span className="tiny muted" style={{ fontWeight: 400 }}>optionnel : salaire journalier de référence × 30,42</span>
-            <input inputMode="decimal" value={data.profile.monthlyRefSalary ?? ''} onChange={(e) => setProfile({ monthlyRefSalary: e.target.value ? num(e.target.value) : null })} />
+        <details className="toggle-manual">
+        <summary>
+          Mon profil
+          <span className="tiny muted" style={{ fontWeight: 400, display: 'block' }}>
+            annexe {data.profile.annexe}{data.contracts.some((c) => c.source?.kind === 'aem') ? ' (déduite de vos AEM)' : ''} · plafond du cumul {data.profile.monthlyRefSalary ? eur(data.profile.monthlyRefSalary) : autoCeiling ? `${eur(autoCeiling)} (déduit du relevé)` : 'non renseigné'} · délai d'attente {data.profile.waitingApplied === true ? 'déjà appliqué' : data.profile.waitingApplied === false ? 'à appliquer' : 'inconnu (compté par prudence)'}
+          </span>
+        </summary>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10, paddingBottom: 12 }}>
+          <label className="field">Plafond du cumul salaire + chômage (€/mois) <span className="tiny muted" style={{ fontWeight: 400 }}>{autoCeiling ? `vide : ${eur(autoCeiling)}, déduit du relevé (SJR × 30,42)` : 'salaire journalier de référence × 30,42'}</span>
+            <input inputMode="decimal" placeholder={autoCeiling ? String(Math.round(autoCeiling)) : ''} value={data.profile.monthlyRefSalary ?? ''} onChange={(e) => setProfile({ monthlyRefSalary: e.target.value ? num(e.target.value) : null })} />
           </label>
           <label className="field">Annexe visée<select value={data.profile.annexe} onChange={(e) => setProfile({ annexe: e.target.value as Annexe })}><option value="8">8 · technicien·ne</option><option value="10">10 · artiste</option></select></label>
           <label className="check"><input type="checkbox" checked={data.profile.over50} onChange={(e) => setProfile({ over50: e.target.checked })} />J'ai 50 ans ou plus</label>
@@ -429,18 +438,27 @@ function RegimeGeneral() {
             </select>
           </label>
         </div>
-        <h3 style={{ fontSize: 15 }}>Périodes sans indemnisation</h3>
-        <p className="tiny muted" style={{ margin: 0 }}>Mois où France Travail ne vous a rien versé alors que vous n'aviez pas de contrat : désinscription, mois non actualisé, paiement suspendu, attente de reprise. Sans elles, l'outil croit votre reliquat consommé.</p>
+        </details>
+        <details className="toggle-manual">
+        <summary>
+          Périodes sans indemnisation
+          <span className="tiny muted" style={{ fontWeight: 400, display: 'block' }}>
+            {unpaidList.length ? `${unpaidList.length} période${unpaidList.length > 1 ? 's' : ''}${unpaidFromReleve ? `, dont ${unpaidFromReleve} déduite${unpaidFromReleve > 1 ? 's' : ''} de vos relevés` : ''}` : 'aucune'} · carence, différés et période avant inscription sont déduits des relevés importés
+          </span>
+        </summary>
+        <p className="tiny muted" style={{ margin: 0 }}>À ajouter à la main seulement ce que les relevés ne montrent pas : mois sans relevé où rien n'a été versé (désinscription, mois non actualisé, paiement suspendu, attente de reprise). Sans elles, l'outil croit votre reliquat consommé.</p>
         <div className="nav" style={{ alignItems: 'flex-end' }}>
           <label className="field">du<input type="date" value={up.from} onChange={(e) => setUp({ ...up, from: e.target.value })} /></label>
           <label className="field">au<input type="date" value={up.to} onChange={(e) => setUp({ ...up, to: e.target.value })} /></label>
           <label className="field">motif<input value={up.reason} placeholder="ex. non inscrit" onChange={(e) => setUp({ ...up, reason: e.target.value })} /></label>
           <button className="btn sm" disabled={!up.from || !up.to || up.to < up.from} onClick={() => { setProfile({ unpaidPeriods: [...(data.profile.unpaidPeriods ?? []), { id: uid(), from: up.from, to: up.to, reason: up.reason || undefined }] }); setUp({ from: '', to: '', reason: '' }); }}>Ajouter</button>
         </div>
-        {(data.profile.unpaidPeriods ?? []).map((u) => (
-          <div className="kv small" key={u.id}><span>{fmtDay(toDay(u.from))} → {fmtDay(toDay(u.to))}{u.reason ? ` · ${u.reason}` : ''}</span>
-            <button className="btn sm danger" aria-label="Supprimer la période" onClick={() => setProfile({ unpaidPeriods: (data.profile.unpaidPeriods ?? []).filter((x) => x.id !== u.id) })}><Trash /></button></div>
+        {unpaidList.map((u) => (
+          <div className="kv small" key={u.id}><span>{fmtDay(toDay(u.from))} → {fmtDay(toDay(u.to))}{u.reason ? ` · ${u.reason}` : ''}{u.fromReleve ? <span className="tiny muted"> · déduite du relevé</span> : null}</span>
+            <button className="btn sm danger" aria-label="Supprimer la période" onClick={() => setProfile({ unpaidPeriods: unpaidList.filter((x) => x.id !== u.id) })}><Trash /></button></div>
         ))}
+        <div style={{ height: 8 }} />
+        </details>
         <h3 style={{ fontSize: 15 }}>Demandes de droit d'option déjà envoyées</h3>
         <p className="tiny muted" style={{ margin: 0 }}>Une fin de contrat déjà examinée (demande refusée ou en cours) ne peut pas resservir : il faudra une nouvelle fin de contrat.</p>
         <div className="nav" style={{ alignItems: 'flex-end' }}>

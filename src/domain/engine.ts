@@ -316,7 +316,9 @@ export function simulate(input: SimInput): Simulation {
     const indemDays = off >= n ? 0 : Math.max(0, monthDays - off);
     const full = aj * indemDays;
     const raw = Math.max(0, full - rules.deductionRate * g);
-    const plafond = profile.monthlyRefSalary ? Math.max(0, profile.monthlyRefSalary - g) : Infinity;
+    // Plafond du cumul : saisi, sinon salaire journalier de référence du relevé × 30,42 (circulaire Unédic 2025-03, fiche 7)
+    const ceiling = profile.monthlyRefSalary ?? (rel?.sjr ? Math.round(rel.sjr * 30.42 * 100) / 100 : null);
+    const plafond = ceiling ? Math.max(0, ceiling - g) : Infinity;
     const capped = Math.min(raw, plafond);
     // Un contrat compte dans chaque mois où il a au moins un jour
     const inMonth = contracts.filter((c) => contractStart(c) < d + n && contractEnd(c) >= d && c.days.some((iso) => {

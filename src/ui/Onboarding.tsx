@@ -29,6 +29,9 @@ export function Onboarding() {
   const last = STEPS.length - 1;
   // Le bloc « Informations sur vos droits » d'un relevé est arrêté au dernier jour du mois précédent
   const releveCount = data.profile.releves.length;
+  // Téléphone : écran étroit et pointeur tactile
+  const phone = typeof window !== 'undefined' && window.matchMedia?.('(max-width: 760px) and (pointer: coarse)').matches;
+  const [phoneOk, setPhoneOk] = useState(false);
   const [f, setF] = useState({ daysLeft: '', date: fromDay(monthStart(parts(today).y, parts(today).m) - 1), aj: '' });
 
   const finish = (withDemo: boolean) => {
@@ -58,6 +61,12 @@ export function Onboarding() {
         {data.onboarded ? <a href="#/" className="btn ghost">Retour au tableau de bord</a> : <button className="btn ghost" onClick={() => setStep(last)}>Passer l'explication</button>}
       </header>
 
+      {phone && step === 0 && !phoneOk && (
+        <div className="alert warn" role="note" style={{ maxWidth: 1240, width: '100%', margin: '0 auto' }}>
+          <span className="small"><strong>Conseillé sur ordinateur.</strong> Vous allez télécharger vos relevés et vos attestations (PDF) puis les déposer ici : c'est bien plus simple sur un ordinateur. Vous pouvez quand même continuer sur téléphone.</span>
+          <button className="btn sm" onClick={() => setPhoneOk(true)}>Compris</button>
+        </div>
+      )}
       <main>
         <section className="stage" aria-hidden="true"><Visual step={step} /></section>
         <section className="text">

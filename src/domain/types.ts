@@ -48,11 +48,13 @@ export interface UnpaidPeriod {
   from: string;
   to: string;
   reason?: string;
+  /** Déduite d'un relevé de situation importé (carence, différé, période avant inscription…). */
+  fromReleve?: boolean;
 }
 
 export interface Profile {
   releves: Releve[];
-  /** Salaire mensuel de référence : plafond du cumul salaire + chômage. Optionnel. */
+  /** Plafond du cumul salaire + chômage (€/mois). null : déduit du SJR du relevé (SJR × 30,42). */
   monthlyRefSalary: number | null;
   annexe: Annexe;
   over50: boolean;

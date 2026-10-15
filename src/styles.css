@@ -365,3 +365,20 @@ table.data td.mark-known { background: var(--chom-bg) !important; color: var(--c
 .toggle-manual > summary::marker { color: var(--muted); }
 .mock-row .mock-pdf { flex: none; display: inline-grid; width: 24px; height: 28px; }
 .mock-stack .mock-pdf.big { flex: none; }
+.guide-cta { display: flex; align-items: center; gap: 12px; width: 100%; padding: 18px 16px; border-radius: 14px; background: var(--chom); color: #fff; text-decoration: none; font-weight: 800; font-size: 17px; box-shadow: 0 3px 0 color-mix(in srgb, var(--chom) 60%, #000); }
+.guide-cta:hover { filter: brightness(1.06); }
+.guide-cta span { display: flex; flex-direction: column; }
+.guide-cta small { font-size: 11px; font-weight: 500; opacity: .85; }
+.guide.compact .guide-step:first-child .guide-mock { display: flex; }
+@media (max-width: 600px) { .beta-banner { font-size: 11.5px; line-height: 1.35; padding: 6px 10px; } }
+/* Gros bouton « ouvrir mon espace France Travail » : halo pulsé + flèche qui avance */
+.guide-cta { position: relative; font-size: 16px; line-height: 1.25; animation: cta-pulse 2s ease-out infinite; }
+.guide-cta-arrow { margin-left: auto; font-size: 22px; animation: cta-nudge 1.2s ease-in-out infinite; }
+@keyframes cta-pulse {
+  0% { box-shadow: 0 3px 0 color-mix(in srgb, var(--chom) 60%, #000), 0 0 0 0 color-mix(in srgb, var(--chom) 55%, transparent); }
+  70% { box-shadow: 0 3px 0 color-mix(in srgb, var(--chom) 60%, #000), 0 0 0 12px color-mix(in srgb, var(--chom) 0%, transparent); }
+  100% { box-shadow: 0 3px 0 color-mix(in srgb, var(--chom) 60%, #000), 0 0 0 0 color-mix(in srgb, var(--chom) 0%, transparent); }
+}
+@keyframes cta-nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
+@media (prefers-reduced-motion: reduce) { .guide-cta, .guide-cta-arrow { animation: none; } }
+.guide-cta > svg { flex: none; width: 26px; height: 26px; }

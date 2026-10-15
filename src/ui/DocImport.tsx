@@ -129,7 +129,9 @@ export function DocImport({ kind = 'aem', compact = false }: { kind?: 'releve' |
         contracts: [...contracts, ...created],
         profile: {
           ...d.profile, releves,
-          unpaidPeriods: [...(d.profile.unpaidPeriods ?? []), ...newUnpaid.map((u) => ({ id: uid(), ...u }))],
+          unpaidPeriods: [...(d.profile.unpaidPeriods ?? []), ...newUnpaid.map((u) => ({ id: uid(), ...u, fromReleve: true }))],
+          // Annexe : celle de la majorité des heures attestées par les AEM importées
+          annexe: found.aems.length ? (found.aems.reduce((h, a) => h + (a.annexe === '10' ? a.hours ?? 0 : -(a.hours ?? 0)), 0) > 0 ? '10' : '8') : d.profile.annexe,
           waitingApplied: found.waiting && waitingOk ? true : d.profile.waitingApplied,
         },
       };
