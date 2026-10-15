@@ -1,0 +1,186 @@
+{
+  "version": 1,
+  "onboarded": true,
+  "profile": {
+    "releves": [
+      {
+        "id": "r1",
+        "date": "2026-09-30",
+        "daysLeft": 300,
+        "dailyAllowance": 46
+      }
+    ],
+    "monthlyRefSalary": null,
+    "annexe": "8",
+    "over50": false
+  },
+  "contracts": [
+    {
+      "id": "ex8",
+      "title": "Théâtre · montage",
+      "days": [
+        "2026-01-19",
+        "2026-01-20",
+        "2026-01-21",
+        "2026-01-22",
+        "2026-01-23",
+        "2026-01-26",
+        "2026-01-27",
+        "2026-01-28",
+        "2026-01-29",
+        "2026-01-30"
+      ],
+      "hours": 70,
+      "gross": 1450,
+      "annexe": "8",
+      "simulated": false
+    },
+    {
+      "id": "ex9",
+      "title": "Tournée · lumière",
+      "days": [
+        "2026-03-09",
+        "2026-03-10",
+        "2026-03-11",
+        "2026-03-12",
+        "2026-03-13",
+        "2026-03-16",
+        "2026-03-17",
+        "2026-03-18",
+        "2026-03-19",
+        "2026-03-20"
+      ],
+      "hours": 80,
+      "gross": 1700,
+      "annexe": "8",
+      "simulated": false
+    },
+    {
+      "id": "ex10",
+      "title": "Festival · lumière",
+      "days": [
+        "2026-05-11",
+        "2026-05-12",
+        "2026-05-13",
+        "2026-05-14",
+        "2026-05-15",
+        "2026-05-18",
+        "2026-05-19",
+        "2026-05-20",
+        "2026-05-21",
+        "2026-05-22"
+      ],
+      "hours": 80,
+      "gross": 1700,
+      "annexe": "8",
+      "simulated": false
+    },
+    {
+      "id": "ex11",
+      "title": "Opéra · plateau",
+      "days": [
+        "2026-06-15",
+        "2026-06-16",
+        "2026-06-17",
+        "2026-06-18",
+        "2026-06-19",
+        "2026-06-22",
+        "2026-06-23",
+        "2026-06-24",
+        "2026-06-25",
+        "2026-06-26"
+      ],
+      "hours": 80,
+      "gross": 1700,
+      "annexe": "8",
+      "simulated": false
+    },
+    {
+      "id": "ex12",
+      "title": "Festival d’été · lumière",
+      "days": [
+        "2026-08-17",
+        "2026-08-18",
+        "2026-08-19",
+        "2026-08-20",
+        "2026-08-21",
+        "2026-08-24",
+        "2026-08-25",
+        "2026-08-26",
+        "2026-08-27",
+        "2026-08-28"
+      ],
+      "hours": 80,
+      "gross": 1650,
+      "annexe": "8",
+      "simulated": false
+    },
+    {
+      "id": "ex13",
+      "title": "Création · lumière",
+      "days": [
+        "2026-09-14",
+        "2026-09-15",
+        "2026-09-16",
+        "2026-09-17",
+        "2026-09-18",
+        "2026-09-21",
+        "2026-09-22",
+        "2026-09-23",
+        "2026-09-24",
+        "2026-09-25"
+      ],
+      "hours": 80,
+      "gross": 1700,
+      "annexe": "8",
+      "simulated": false
+    },
+    {
+      "id": "ex14",
+      "title": "Concert · lumière",
+      "days": [
+        "2026-10-12",
+        "2026-10-13",
+        "2026-10-14",
+        "2026-10-15",
+        "2026-10-16"
+      ],
+      "hours": 40,
+      "gross": 850,
+      "annexe": "8",
+      "simulated": true
+    }
+  ],
+  "settings": {
+    "rules": {
+      "hoursRequired": 507,
+      "threshold": 0.3,
+      "deductionRate": 0.7,
+      "lowAllowance": 20,
+      "windowDays": 365,
+      "ajMin": 31.96,
+      "floor8": 38,
+      "floor10": 44,
+      "intermittentPeriodDays": 365,
+      "teachingCap": 70,
+      "teachingCap50": 120,
+      "assimilatedCap": 338,
+      "monthDays": null,
+      "waitingDays": 7,
+      "smicHourly": 12.02,
+      "retirementRate": 0.03,
+      "retirementFloor": 31.97,
+      "arceRate": 0.6,
+      "safetyMargin": 0.05,
+      "ajMax": 174.8
+    },
+    "todayOverride": "2026-10-07",
+    "fallbackHourlyGross": 23,
+    "theme": "auto"
+  },
+  "releveReminderDismissed": null,
+  "toursSeen": [
+    "contrats",
+    "tableau"
+  ]
+}

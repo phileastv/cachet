@@ -1,0 +1,49 @@
+import { DONATE_URL, REPO_URL } from '../config';
+import { useStore } from '../state/store';
+import { useRoute } from '../state/router';
+import { Contracts } from './Contracts';
+import { Dashboard } from './Dashboard';
+import { HelpPage } from './HelpPage';
+import { GitHub, Logo, Plus, Save, Sliders } from './Icons';
+import { Onboarding } from './Onboarding';
+import { SavePage } from './SavePage';
+import { SettingsPage } from './SettingsPage';
+import { SupportPage } from './SupportPage';
+
+export function App() {
+  const { data } = useStore();
+  const route = useRoute().split('?')[0];
+
+  if ((!data.onboarded && route !== '/sauvegarde') || route === '/bienvenue') return <Onboarding />;
+
+  let page = <Dashboard />;
+  if (route === '/contrats') page = <Contracts tab="intermittence" />;
+  else if (route === '/contrats/regime') page = <Contracts tab="regime" />;
+  else if (route === '/sauvegarde') page = <SavePage />;
+  else if (route === '/parametres') page = <SettingsPage />;
+  else if (route === '/aide') page = <HelpPage />;
+  else if (route === '/soutenir') page = <SupportPage />;
+
+  return (
+    <div className="wrap">
+      <header className="topbar">
+        <a className="brand" href="#/"><Logo /><strong>Bascule</strong><span className="small muted">droit d'option intermittent</span></a>
+        <nav className="nav" aria-label="Navigation principale">
+          <a className="btn primary" href="#/contrats"><Plus />Ajouter / modifier les contrats</a>
+          <a className="btn" href="#/aide">Comprendre</a>
+          <a className="btn" href="#/sauvegarde"><Save />Sauvegarder</a>
+          <a className="btn icon" href="#/parametres" aria-label="Paramètres"><Sliders /></a>
+          <a className="btn donate" href={DONATE_URL || '#/soutenir'} target={DONATE_URL ? '_blank' : undefined} rel="noreferrer">♥ Faire un don</a>
+        </nav>
+      </header>
+      {page}
+      <footer className="tiny muted" style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', paddingTop: 12, borderTop: '1px solid var(--line)' }}>
+        <span>Logiciel libre · vos données restent dans votre navigateur · aide au calcul, pas un avis juridique.</span>
+        <span style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <a className="btn sm" href={REPO_URL || '#/soutenir'} target={REPO_URL ? '_blank' : undefined} rel="noreferrer"><GitHub />Code source sur GitHub</a>
+          <a href="#/bienvenue">Revoir l'explication</a>
+        </span>
+      </footer>
+    </div>
+  );
+}

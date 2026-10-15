@@ -1,0 +1,111 @@
+{
+  "version": 1,
+  "onboarded": true,
+  "profile": {
+    "releves": [
+      {
+        "id": "r1",
+        "date": "2026-09-30",
+        "daysLeft": 400,
+        "dailyAllowance": 40
+      }
+    ],
+    "monthlyRefSalary": null,
+    "annexe": "8",
+    "over50": false
+  },
+  "contracts": [
+    {
+      "id": "ex40",
+      "title": "Concert · accueil",
+      "days": [
+        "2026-03-09",
+        "2026-03-10",
+        "2026-03-11",
+        "2026-03-12",
+        "2026-03-13"
+      ],
+      "hours": 40,
+      "gross": 800,
+      "annexe": "8",
+      "simulated": false
+    },
+    {
+      "id": "ex41",
+      "title": "Festival · accueil",
+      "days": [
+        "2026-06-15",
+        "2026-06-16",
+        "2026-06-17",
+        "2026-06-18",
+        "2026-06-19"
+      ],
+      "hours": 40,
+      "gross": 800,
+      "annexe": "8",
+      "simulated": false
+    },
+    {
+      "id": "ex42",
+      "title": "Salon · accueil",
+      "days": [
+        "2026-09-14",
+        "2026-09-15",
+        "2026-09-16",
+        "2026-09-17",
+        "2026-09-18"
+      ],
+      "hours": 40,
+      "gross": 800,
+      "annexe": "8",
+      "simulated": false
+    },
+    {
+      "id": "ex43",
+      "title": "Gala · accueil",
+      "days": [
+        "2026-11-16",
+        "2026-11-17",
+        "2026-11-18",
+        "2026-11-19",
+        "2026-11-20"
+      ],
+      "hours": 40,
+      "gross": 800,
+      "annexe": "8",
+      "simulated": true
+    }
+  ],
+  "settings": {
+    "rules": {
+      "hoursRequired": 507,
+      "threshold": 0.3,
+      "deductionRate": 0.7,
+      "lowAllowance": 20,
+      "windowDays": 365,
+      "ajMin": 31.96,
+      "floor8": 38,
+      "floor10": 44,
+      "intermittentPeriodDays": 365,
+      "teachingCap": 70,
+      "teachingCap50": 120,
+      "assimilatedCap": 338,
+      "monthDays": null,
+      "waitingDays": 7,
+      "smicHourly": 12.02,
+      "retirementRate": 0.03,
+      "retirementFloor": 31.97,
+      "arceRate": 0.6,
+      "safetyMargin": 0.05,
+      "ajMax": 174.8
+    },
+    "todayOverride": "2026-10-07",
+    "fallbackHourlyGross": 23,
+    "theme": "auto"
+  },
+  "releveReminderDismissed": null,
+  "toursSeen": [
+    "contrats",
+    "tableau"
+  ]
+}

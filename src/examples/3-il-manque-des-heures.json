@@ -1,0 +1,201 @@
+{
+  "version": 1,
+  "onboarded": true,
+  "profile": {
+    "releves": [
+      {
+        "id": "r1",
+        "date": "2026-09-30",
+        "daysLeft": 300,
+        "dailyAllowance": 44
+      }
+    ],
+    "monthlyRefSalary": null,
+    "annexe": "8",
+    "over50": false
+  },
+  "contracts": [
+    {
+      "id": "ex15",
+      "title": "Concert · son",
+      "days": [
+        "2026-04-13",
+        "2026-04-14",
+        "2026-04-15",
+        "2026-04-16",
+        "2026-04-17"
+      ],
+      "hours": 40,
+      "gross": 900,
+      "annexe": "8",
+      "simulated": false
+    },
+    {
+      "id": "ex16",
+      "title": "Festival · son",
+      "days": [
+        "2026-06-08",
+        "2026-06-09",
+        "2026-06-10",
+        "2026-06-11",
+        "2026-06-12"
+      ],
+      "hours": 40,
+      "gross": 900,
+      "annexe": "8",
+      "simulated": false
+    },
+    {
+      "id": "ex17",
+      "title": "Festival · son",
+      "days": [
+        "2026-07-06",
+        "2026-07-07",
+        "2026-07-08",
+        "2026-07-09",
+        "2026-07-10",
+        "2026-07-13",
+        "2026-07-14",
+        "2026-07-15",
+        "2026-07-16",
+        "2026-07-17"
+      ],
+      "hours": 80,
+      "gross": 1800,
+      "annexe": "8",
+      "simulated": false
+    },
+    {
+      "id": "ex18",
+      "title": "Tournée · son",
+      "days": [
+        "2026-09-07",
+        "2026-09-08",
+        "2026-09-09",
+        "2026-09-10",
+        "2026-09-11",
+        "2026-09-14",
+        "2026-09-15",
+        "2026-09-16",
+        "2026-09-17",
+        "2026-09-18"
+      ],
+      "hours": 80,
+      "gross": 1800,
+      "annexe": "8",
+      "simulated": false
+    },
+    {
+      "id": "ex19",
+      "title": "Tournée · son",
+      "days": [
+        "2026-10-12",
+        "2026-10-13",
+        "2026-10-14",
+        "2026-10-15",
+        "2026-10-16",
+        "2026-10-19",
+        "2026-10-20",
+        "2026-10-21",
+        "2026-10-22",
+        "2026-10-23"
+      ],
+      "hours": 80,
+      "gross": 1800,
+      "annexe": "8",
+      "simulated": true
+    },
+    {
+      "id": "ex20",
+      "title": "Salon · son",
+      "days": [
+        "2026-11-09",
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-16",
+        "2026-11-17",
+        "2026-11-18",
+        "2026-11-19",
+        "2026-11-20"
+      ],
+      "hours": 80,
+      "gross": 1800,
+      "annexe": "8",
+      "simulated": true
+    },
+    {
+      "id": "ex21",
+      "title": "Gala · son",
+      "days": [
+        "2026-12-07",
+        "2026-12-08",
+        "2026-12-09",
+        "2026-12-10",
+        "2026-12-11",
+        "2026-12-14",
+        "2026-12-15",
+        "2026-12-16",
+        "2026-12-17",
+        "2026-12-18"
+      ],
+      "hours": 80,
+      "gross": 1800,
+      "annexe": "8",
+      "simulated": true
+    },
+    {
+      "id": "ex22",
+      "title": "Tournée · son",
+      "days": [
+        "2027-01-11",
+        "2027-01-12",
+        "2027-01-13",
+        "2027-01-14",
+        "2027-01-15",
+        "2027-01-18",
+        "2027-01-19",
+        "2027-01-20",
+        "2027-01-21",
+        "2027-01-22"
+      ],
+      "hours": 80,
+      "gross": 1800,
+      "annexe": "8",
+      "simulated": true
+    }
+  ],
+  "settings": {
+    "rules": {
+      "hoursRequired": 507,
+      "threshold": 0.3,
+      "deductionRate": 0.7,
+      "lowAllowance": 20,
+      "windowDays": 365,
+      "ajMin": 31.96,
+      "floor8": 38,
+      "floor10": 44,
+      "intermittentPeriodDays": 365,
+      "teachingCap": 70,
+      "teachingCap50": 120,
+      "assimilatedCap": 338,
+      "monthDays": null,
+      "waitingDays": 7,
+      "smicHourly": 12.02,
+      "retirementRate": 0.03,
+      "retirementFloor": 31.97,
+      "arceRate": 0.6,
+      "safetyMargin": 0.05,
+      "ajMax": 174.8
+    },
+    "todayOverride": "2026-10-07",
+    "fallbackHourlyGross": 23,
+    "theme": "auto"
+  },
+  "releveReminderDismissed": null,
+  "toursSeen": [
+    "contrats",
+    "tableau"
+  ]
+}
