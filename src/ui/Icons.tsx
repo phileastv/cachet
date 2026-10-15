@@ -1,12 +1,17 @@
 const base = { fill: 'none', stroke: 'currentColor', strokeWidth: 2.2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
 
+/** Logo : un calendrier qui se remplit, du gris à l'orange foncé ; la dernière case, bleue, est le chômage qui bascule. */
 export const Logo = () => (
   <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">
-    <rect x="1" y="1" width="8" height="8" rx="2" fill="#F6A66A" />
-    <rect x="11" y="1" width="8" height="8" rx="2" fill="#B4500F" />
-    <rect x="21" y="1" width="8" height="8" rx="2" fill="#ECEEF2" />
-    <rect x="1" y="12" width="28" height="5" rx="2.5" fill="#2F6FE4" />
-    <rect x="1" y="21" width="18" height="8" rx="2" fill="#E8762B" />
+    <rect x="1" y="1" width="8" height="8" rx="2" fill="#ECEEF2" />
+    <rect x="11" y="1" width="8" height="8" rx="2" fill="#F6A66A" />
+    <rect x="21" y="1" width="8" height="8" rx="2" fill="#E8762B" />
+    <rect x="1" y="11" width="8" height="8" rx="2" fill="#F6A66A" />
+    <rect x="11" y="11" width="8" height="8" rx="2" fill="#E8762B" />
+    <rect x="21" y="11" width="8" height="8" rx="2" fill="#B4500F" />
+    <rect x="1" y="21" width="8" height="8" rx="2" fill="#E8762B" />
+    <rect x="11" y="21" width="8" height="8" rx="2" fill="#B4500F" />
+    <rect x="21" y="21" width="8" height="8" rx="2" fill="#2F6FE4" />
   </svg>
 );
 export const Plus = () => <svg width="16" height="16" viewBox="0 0 24 24" {...base}><path d="M12 5v14M5 12h14" /></svg>;
