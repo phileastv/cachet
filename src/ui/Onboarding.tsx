@@ -117,7 +117,7 @@ function Body({ step }: { step: number }) {
         <P>Beaucoup d'intermittent·es tombent dans le piège sans le voir. Personnellement, ça m'a pris deux ans de galères pour comprendre et enfin ouvrir mes droits d'intermittent. J'ai créé cet outil pour vous aider à calculer <strong>si</strong> vous pouvez le faire, et <strong>quand</strong>.</P>
         <div className="ob-promise">
           <span aria-hidden="true">✓</span>
-          <p>Cet outil va vous aider à calculer <strong>précisément</strong> tout ça, <strong>gratuitement</strong> !</p>
+          <p className="lead">Cet outil va vous aider à calculer <strong>précisément</strong> tout ça, <strong>gratuitement</strong> !</p>
         </div>
       </>;
     case 1:

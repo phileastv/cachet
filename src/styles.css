@@ -384,7 +384,7 @@ table.data td.mark-known { background: var(--chom-bg) !important; color: var(--c
 .guide-cta > svg { flex: none; width: 26px; height: 26px; }
 
 /* Accueil : promesse mise en avant */
-.ob-promise { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 16px; background: var(--ok-bg); color: var(--ok-ink); box-shadow: 0 0 0 2px color-mix(in srgb, var(--ok-ink) 30%, transparent); }
-.ob-promise > span { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--ok-ink); color: var(--ok-bg); font-size: 22px; font-weight: 800; }
-.ob-promise p { margin: 0; font-size: clamp(18px, 2.2vw, 22px); line-height: 1.35; font-weight: 600; }
+.ob-promise { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 16px; background: var(--ok-bg); color: var(--ok-ink); box-shadow: 0 0 0 2px color-mix(in srgb, var(--ok-ink) 30%, transparent); }
+.ob-promise > span { flex: none; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--ok-ink); color: var(--ok-bg); font-size: 16px; font-weight: 800; }
+.ob .ob-promise p.lead { margin: 0; color: inherit; }
 .ob-pill { font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 99px; background: var(--ok-bg); color: var(--ok-ink); }
