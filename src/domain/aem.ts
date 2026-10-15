@@ -84,31 +84,100 @@ function parseXotis(rows: Row[]): ParsedAem | null {
   };
 }
 
-/** Gabarit standard Unédic (libellés en texte) : ligne code-barres « …##AEM##MM-AAAA##… ». */
+/**
+ * Gabarit standard Unédic (formulaire DAJ 110, édité par Silae, Movinmotion…) : les libellés sont du texte,
+ * les valeurs sont posées à côté. On s'appuie sur les libellés et sur la position horizontale des valeurs.
+ */
 function parseStandard(rows: Row[]): ParsedAem | null {
-  const text = rows.map((r) => r.text).join('\n');
-  const bar = text.match(/##AEM##(\d{2})-(\d{4})##([A-Z0-9]+)##/);
-  if (!bar) return null;
   const doubts: string[] = [];
-  const allDates = [...text.matchAll(/\b(\d{2})\s+(\d{2})\s+(20\d{2})\b/g)].map((m) => `${m[3]}-${m[2]}-${m[1]}`);
-  const endM = text.match(/Date de fin du contrat de travail\s*(\d{2})\s+(\d{2})\s+(\d{4})/i);
-  const end = endM ? `${endM[3]}-${endM[2]}-${endM[1]}` : null;
-  const start = allDates.find((d) => d !== end && d.slice(0, 7) <= `${bar[2]}-${bar[1]}`) ?? null;
+  const text = rows.map((r) => r.text).join('\n');
+  const refRe = /^[A-Z]{3,4}\d{6,7}$/;
+  const ints = (r: Row) => r.cells.filter((c) => /^\d+$/.test(c.s));
+  // Mois : ligne code-barres « ##AEM##MM-AAAA## », sinon les chiffres isolés de l'en-tête « MOIS 20__ »
+  const bar = text.match(/##AEM##(\d{2})-(\d{4})##/);
+  // Selon le logiciel de paie, « 0 5 2 6 » arrive en quatre cases ou en deux (« 0 5 », « 2 6 »)
+  const digitsOf = (r: Row) => r.cells.filter((c) => /^\d( \d)*$/.test(c.s)).flatMap((c) => c.s.split(' '));
+  const head = rows.find((r) => r.cells.some((c) => refRe.test(c.s)) && digitsOf(r).length >= 4);
+  const d = head ? digitsOf(head) : [];
+  const month = bar ? `${bar[2]}-${bar[1]}` : d.length >= 4 ? `20${d[2]}${d[3]}-${d[0]}${d[1]}` : null;
+  if (!month) return null;
+  // Numéro d'attestation (dédoublonnage) et, pour une complémentaire, numéro de l'attestation initiale
+  const headIdx = head ? rows.indexOf(head) : -1;
+  const ref = head?.cells.find((c) => refRe.test(c.s))?.s ?? null;
+  if (!ref) doubts.push("numéro d'attestation");
+  const kindRow = rows.find((r) => r.cells.some((c) => /INITIALE$/.test(c.s)) && r.cells.some((c) => /^COMPLEMENTAIRE/.test(c.s)));
+  let initialRef: string | null = null;
+  if (kindRow) {
+    const xInit = kindRow.cells.find((c) => /INITIALE$/.test(c.s))!.x;
+    const xComp = kindRow.cells.find((c) => /^COMPLEMENTAIRE/.test(c.s))!.x;
+    const marks = kindRow.cells.filter((c) => c.s === 'X').map((c) => c.x);
+    if (marks.some((x) => x > xComp) && !marks.some((x) => x > xInit && x < xComp)) {
+      initialRef = rows.slice(Math.max(0, headIdx), headIdx + 6).flatMap((r) => r.cells).find((c) => refRe.test(c.s) && c.s !== ref)?.s ?? null;
+    }
+  }
+  // Dates : « Date d'embauche jj mm aaaa … Contrat en cours [X] Sinon Date de fin du contrat de travail jj mm aaaa »
+  const dateRow = rows.find((r) => /Date d'embauche/i.test(r.text));
+  if (!dateRow) return null;
+  const cells = dateRow.cells;
+  // « 15 12 2022 » en trois cases ou en une seule
+  const tripletAfter = (from: number): string | null => {
+    const n = cells.slice(from).flatMap((c) => (/^\d{1,4}( \d{1,4})*$/.test(c.s) ? c.s.split(' ') : [])).slice(0, 3);
+    return n.length === 3 && /^\d{4}$/.test(n[2]) ? `${n[2]}-${n[1].padStart(2, '0')}-${n[0].padStart(2, '0')}` : null;
+  };
+  const iEmb = cells.findIndex((c) => /d'embauche/i.test(c.s));
+  const iTrav = cells.map((c) => /travail$/.test(c.s)).lastIndexOf(true);
+  const start = iEmb >= 0 ? tripletAfter(iEmb + 1) : null;
   if (!start) return null;
-  if (!end) doubts.push('date de fin (contrat en cours ?)');
+  const end = iTrav >= 0 ? tripletAfter(iTrav + 1) : null;
+  const iCours = cells.findIndex((c) => /cours$/.test(c.s));
+  const iSinon = cells.findIndex((c) => c.s === 'Sinon');
+  const ongoing = iCours >= 0 && cells.slice(iCours + 1, iSinon > iCours ? iSinon : undefined).some((c) => c.s === 'X');
+  if (!end && !ongoing) doubts.push('date de fin');
+  // Heures, cachets, jours travaillés : la ligne de nombres sous l'en-tête « isolés | groupés | JOURS travaillés »,
+  // chaque nombre rattaché à la colonne la plus proche
+  const hdrIdx = rows.findIndex((r) => r.cells.some((c) => c.s === 'isolés') && r.cells.some((c) => /^JOURS/.test(c.s)));
+  let hours: number | null = null;
+  let cachets: number | null = null;
+  let workedDays: number | null = null;
+  if (hdrIdx >= 0) {
+    const hdr = rows[hdrIdx];
+    const xOf = (s: string, fallback: number) => hdr.cells.find((c) => c.s === s)?.x ?? fallback;
+    const hoursX = rows.slice(Math.max(0, hdrIdx - 3), hdrIdx).flatMap((r) => r.cells).find((c) => /d'HEURES/i.test(c.s))?.x ?? xOf('isolés', 146) - 75;
+    const daysX = hdr.cells.find((c) => /^JOURS/.test(c.s))?.x ?? 263;
+    const cols: [string, number][] = [['hours', hoursX], ['isoles', xOf('isolés', 146)], ['groupes', xOf('groupés', 182)], ['days', daysX]];
+    const valRow = rows.slice(hdrIdx + 1, hdrIdx + 5).find((r) => ints(r).some((c) => c.x < cols[3][1] + 60));
+    if (valRow) {
+      let iso = 0;
+      let grp = 0;
+      for (const c of ints(valRow)) {
+        if (c.x > cols[3][1] + 60) continue;
+        const col = cols.reduce((best, k) => (Math.abs(k[1] - c.x) < Math.abs(best[1] - c.x) ? k : best))[0];
+        if (col === 'hours') hours = Number(c.s);
+        else if (col === 'isoles') iso = Number(c.s);
+        else if (col === 'groupes') grp = Number(c.s);
+        else workedDays = Number(c.s);
+      }
+      if (iso + grp > 0) cachets = iso + grp;
+    }
+  }
+  if (hours === null && cachets === null) doubts.push('heures');
+  if (workedDays === null) doubts.push('jours travaillés');
   const sal = salaryRow(rows);
   if (!sal) doubts.push('salaire');
-  // Heures et jours : la ligne qui suit « Nombre d'HEURES … JOURS travaillés » contient deux ou trois entiers
-  const hi = rows.findIndex((r) => /JOURS travaill/i.test(r.text));
-  const nr = hi >= 0 ? rows.slice(Math.max(0, hi - 3), hi + 4).find((r) => /^\d+( \d+){1,2}$/.test(r.text)) : undefined;
-  const ints = nr ? nr.text.split(' ').map(Number) : [];
-  if (ints.length < 2) doubts.push('heures et jours');
-  const job = text.match(/Emploi occupé\s*([^\n]+)/i)?.[1]?.replace(/\s*\d{3}[A-Z]\d{8}.*/, '').trim() ?? '';
-  const employer = text.match(/Raison sociale\s+([^\n]+)/i)?.[1]?.replace(/N° IDCC.*/i, '').trim() ?? '';
-  const artist = /\bX\s*Artiste|Artiste\s*X\b/.test(text) || ARTIST.test(job);
+  // Employeur, emploi, statut (artiste → annexe 10)
+  const rs = rows.find((r) => r.cells.some((c) => /^Raison( sociale)?$/.test(c.s)));
+  const employer = rs ? rs.cells.slice(rs.cells.map((c) => /sociale$/.test(c.s)).lastIndexOf(true) + 1).map((c) => c.s).filter((s) => !/^(ou|nom)$/i.test(s)).join(' ').trim() : '';
+  const jobRow = rows.find((r) => r.cells.some((c) => /^\d{3}[A-Z]\d{8}$/.test(c.s)));
+  const job = jobRow ? jobRow.cells.filter((c) => !/^\d{3}[A-Z]\d{8}$/.test(c.s)).map((c) => c.s).join(' ').trim() : '';
+  const stRow = rows.find((r) => r.cells.some((c) => c.s === 'Artiste') && r.cells.some((c) => c.s === 'Technicien'));
+  let artist = ARTIST.test(job);
+  if (stRow) {
+    const labels = stRow.cells.filter((c) => /^(Réalisateur|Artiste|Technicien|Ouvrier)$/.test(c.s));
+    const marked = stRow.cells.filter((c) => c.s === 'X').map((x) => labels.filter((l) => l.x < x.x).sort((a, b) => b.x - a.x)[0]?.s).filter(Boolean);
+    if (marked.length) artist = marked.includes('Artiste');
+  }
   return {
-    ref: bar[3], initialRef: null, month: `${bar[2]}-${bar[1]}`, start, end,
-    hours: ints.length >= 2 ? ints[0] : null, cachets: ints.length === 3 ? ints[1] : null, workedDays: ints.length >= 2 ? ints[ints.length - 1] : null,
+    ref: ref ?? `${month}-${employer}-${start}`, initialRef, month, start, end, hours, cachets, workedDays,
     gross: sal?.gross ?? null, grossSubject: sal?.subject ?? null, employer, job, annexe: artist ? '10' : '8', template: 'standard', doubts,
   };
 }
@@ -127,7 +196,7 @@ export function parseAem(rows: Row[]): ParsedAem | null {
  * Jours travaillés d'une AEM : le nombre de jours indiqué, placés sur les jours de semaine du mois
  * compris dans le contrat (le détail jour par jour n'est pas sur l'AEM ; seul le nombre compte pour le calcul).
  */
-export function aemDays(a: ParsedAem): string[] {
+export function aemDays(a: ParsedAem, taken: Set<string> = new Set()): string[] {
   const [y, m] = a.month.split('-').map(Number);
   const from = Math.max(toDay(a.start), monthStart(y, m - 1));
   const monthEnd = monthStart(y, m - 1) + daysInMonth(y, m - 1) - 1;
@@ -135,17 +204,27 @@ export function aemDays(a: ParsedAem): string[] {
   const span: number[] = [];
   for (let d = from; d <= to; d++) span.push(d);
   const want = Math.min(a.workedDays ?? span.length, span.length);
-  const week = span.filter((d) => weekday(d) < 5);
-  const picked = week.length >= want ? week.slice(0, want) : [...week, ...span.filter((d) => weekday(d) >= 5).slice(0, want - week.length)];
-  return picked.sort((p, q) => p - q).map(fromDay);
+  // Jours de semaine libres d'abord, puis jours de semaine déjà pris par une autre AEM, puis week-ends
+  const free = (d: number) => !taken.has(fromDay(d));
+  const order = [...span.filter((d) => weekday(d) < 5 && free(d)), ...span.filter((d) => weekday(d) < 5 && !free(d)), ...span.filter((d) => weekday(d) >= 5)];
+  return order.slice(0, want).sort((p, q) => p - q).map(fromDay);
 }
 
 /** Contrats à créer à partir des AEM lues (une ligne par AEM, plus la fin d'un contrat dont l'AEM n'est pas encore arrivée). */
 export function aemContracts(list: ParsedAem[], uid: () => string, fallbackAnnexe: Annexe): Contract[] {
   const uniq = [...new Map(list.map((a) => [a.ref, a])).values()].sort((p, q) => (p.month + p.start < q.month + q.start ? -1 : 1));
   const out: Contract[] = [];
+  // Les contrats les plus courts choisissent leurs jours en premier : un contrat d'un jour ne peut pas bouger,
+  // un contrat de deux jours sur une semaine peut éviter ce jour-là
+  const taken = new Set<string>();
+  const daysOf = new Map<ParsedAem, string[]>();
+  for (const a of [...uniq].sort((p, q) => (toDay(p.end ?? p.start) - toDay(p.start)) - (toDay(q.end ?? q.start) - toDay(q.start)))) {
+    const days = aemDays(a, taken);
+    daysOf.set(a, days);
+    for (const d of days) taken.add(d);
+  }
   for (const a of uniq) {
-    const days = aemDays(a);
+    const days = daysOf.get(a) ?? [];
     if (!days.length) continue;
     out.push({
       id: uid(), title: `${a.employer || 'Employeur'}${a.job ? ` · ${a.job.toLowerCase()}` : ''} (AEM ${a.month.slice(5)}/${a.month.slice(0, 4)})`,

@@ -1,9 +1,23 @@
-node_modules
-dist
+# Dépendances et build
+node_modules/
+dist/
+coverage/
+*.log
+
+# Système et éditeurs
 .DS_Store
-prive/
+Thumbs.db
+.vscode/
+.idea/
+
+# Réglages locaux de Claude Code (le launch.json partagé reste versionné)
 .claude/settings.local.json
-*.pdf
-# Fichiers locaux : jamais versionnés (adresse de contact, etc.)
+
+# Valeurs locales ou privées (adresse de contact…) : .env et .env.example restent versionnés
 .env.local
 .env.*.local
+
+# Données personnelles : documents réels, dossiers de vérification, sauvegardes exportées
+prive/
+*.pdf
+*-sauvegarde-*.json

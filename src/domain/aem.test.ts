@@ -33,6 +33,15 @@ describe('lecture d’une AEM (gabarit XOTIS)', () => {
     expect(cs.map((c) => [c.days.length, c.days[0], c.hours, c.gross])).toEqual([[17, '2026-03-09', 133, 2244], [8, '2026-04-01', 55, 1067.4]]);
     expect(openContracts([march, april])).toEqual([]);
   });
+  it('deux AEM du même mois ne sont jamais posées sur le même jour', () => {
+    const long = parseAem(xotis(['9', '5'], 'ABC1000010', null, '01 09 2025', '26 09 2025', '70', '9', '2 100,00', '255,15'))!;
+    const one = parseAem(xotis(['9', '5'], 'ABC1000011', null, '05 09 2025', '05 09 2025', '5', '1', '150,00', '18,23'))!;
+    const cs = aemContracts([long, one], uid, '8');
+    const all = cs.flatMap((c) => c.days);
+    expect(new Set(all).size).toBe(all.length);
+    expect(all.length).toBe(10);
+    expect(cs.find((c) => c.hours === 5)!.days).toEqual(['2025-09-05']);
+  });
   it('contrat encore en cours : signalé, et sa suite peut être ajoutée jusqu’à la vraie date de fin', () => {
     const aug = parseAem(xotis(['8', '6'], 'ABC1000003', null, '31 08 2026', null, '8', '1', '120,00', '15,00'))!;
     expect(openContracts([aug]).map((a) => a.ref)).toEqual(['ABC1000003']);

@@ -146,6 +146,20 @@ describe('reliquat en jours', () => {
     expect(jul.capStartDays).toBe(12);
     expect(jul.paidDays).toBe(12); // 30 − 8 jours sans indemnisation = 22, limité au reliquat
   });
+  it('l’historique estimé se recale sur chaque relevé daté d’une fin de mois', () => {
+    // Relevés au 31/03 (300 j) et au 30/06 (280 j) : entre les deux, 20 j payés selon France Travail,
+    // alors que le moteur, sans les salaires de la période, en reconstruirait 90.
+    const sim = simulate({
+      contracts: [], profile: {
+        releves: [{ id: 'a', date: '2024-03-31', daysLeft: 300, dailyAllowance: 40 }, { id: 'b', date: '2024-06-30', daysLeft: 280, dailyAllowance: 40 }],
+        monthlyRefSalary: null, annexe: '8', over50: false,
+      },
+      rules: DEFAULT_RULES, today: toDay('2024-07-15'), start: toDay('2024-01-01'), end: toDay('2024-12-31'),
+    });
+    expect(sim.months.find((m) => m.key === '2024-03')!.capEndDays).toBe(300);
+    expect(sim.months.find((m) => m.key === '2024-06')!.capEndDays).toBe(280);
+    expect(sim.months.find((m) => m.key === '2024-07')!.capStartDays).toBe(280);
+  });
   it('mensualisation datée : un mois de 31 jours sans contrat verse 31 jours en 2024, 30 en 2026', () => {
     const sim = simulate({
       contracts: [], profile: { releves: [{ id: 'r', date: '2024-01-01', daysLeft: 900, dailyAllowance: 40 }], monthlyRefSalary: null, annexe: '8', over50: false },

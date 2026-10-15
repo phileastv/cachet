@@ -1,5 +1,4 @@
-/** Adresse de contact : définie dans .env.local (hors git, pour éviter qu'elle soit moissonnée sur le dépôt). */
-const CONTACT = import.meta.env.VITE_CONTACT_EMAIL as string | undefined;
+import { CONTACT_EMAIL as CONTACT } from '../config';
 
 /** Bandeau permanent : l'outil est expérimental et ne remplace pas France Travail. */
 export function BetaBanner() {

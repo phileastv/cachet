@@ -371,11 +371,19 @@ export function simulate(input: SimInput): Simulation {
     capDays = Math.max(0, capDays - M.paidDays);
     M.capEndDays = capDays;
   }
-  // Mois passés (avant l'ancre) : on remonte le temps (historique estimé)
+  // Mois passés (avant l'ancre) : on remonte le temps (historique estimé), en se recalant sur chaque
+  // relevé daté d'une fin de mois : entre deux relevés, l'écart vient des salaires non saisis
+  const releveAtEnd = new Map<string, number>();
+  for (const r of profile.releves) {
+    const d = toDay(r.date);
+    const p = parts(d);
+    if (p.d === daysInMonth(p.y, p.m)) releveAtEnd.set(monthKey(p.y, p.m), r.daysLeft);
+  }
   capDays = anchorDays;
   for (let k = Math.min(a, months.length) - 1; k >= 0; k--) {
     const M = months[k];
     M.paid = M.paidDays * M.aj;
+    capDays = releveAtEnd.get(M.key) ?? capDays;
     M.capEndDays = capDays;
     capDays = capDays + M.paidDays;
     M.capStartDays = capDays;
