@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { APP_NAME, DONATE_URL, REPO_URL } from '../config';
+import { APP_NAME, DONATE_URL, REPO_URL, SITE_URL } from '../config';
 import { fromDay, monthStart, parts } from '../domain/dates';
 import { demoData } from '../domain/demo';
 import { go } from '../state/router';
@@ -200,7 +200,7 @@ function Body({ step }: { step: number }) {
         <P>Cet outil est <strong>open source</strong> : son code est public, tout le monde peut le lire, vérifier les calculs, le corriger ou l'améliorer. Il est gratuit, sans publicité, et vos données ne quittent jamais votre navigateur.</P>
         <P>S'il vous a aidé·e, vous pouvez <strong>soutenir le projet</strong> avec un don, et surtout <strong>en parler autour de vous</strong> : pour que d'autres ne tombent pas dans le même piège.</P>
         <div className="nav">
-          {DONATE_URL ? <a className="btn primary" href={DONATE_URL} target="_blank" rel="noreferrer">♥ Soutenir le projet</a> : <span className="btn" aria-disabled="true" style={{ opacity: .7 }}>♥ Soutenir le projet · [LIEN DE DON]</span>}
+          {DONATE_URL && <a className="btn primary" href={DONATE_URL} target="_blank" rel="noreferrer">♥ Soutenir le projet</a>}
           <ShareButton />
           {REPO_URL && <a className="btn ghost" href={REPO_URL} target="_blank" rel="noreferrer">Voir le code source</a>}
         </div>
@@ -217,7 +217,7 @@ function Body({ step }: { step: number }) {
 function ShareButton() {
   const [done, setDone] = useState(false);
   const share = async () => {
-    const url = location.href.split('#')[0];
+    const url = SITE_URL;
     const text = 'Au chômage et bientôt intermittent·e ? Cet outil calcule quand faire son droit d’option.';
     try {
       if (navigator.share) await navigator.share({ title: APP_NAME, text, url });
@@ -335,7 +335,6 @@ function Visual({ step }: { step: number }) {
     default:
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14, width: 'min(100%, 460px)' }}>
-          <div style={{ height: 170, border: '2px dashed var(--line)', borderRadius: 16, display: 'grid', placeItems: 'center', textAlign: 'center', fontSize: 13, padding: 10 }} className="muted">[Capture annotée « Mon espace » France Travail : jours restants entourés, date en dessous]</div>
           <ol className="small" style={{ margin: 0, paddingLeft: 20 }}>
             <li>Connectez-vous sur francetravail.fr ou l'appli « Mon espace ».</li>
             <li>Page d'accueil : <strong>nombre de jours restants</strong> et sa date.</li>

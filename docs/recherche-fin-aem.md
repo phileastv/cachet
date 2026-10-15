@@ -1,4 +1,4 @@
-# Fin des AEM et conséquences pour Bascule (état au 7 octobre 2026)
+# Fin des AEM et conséquences pour Cachet (état au 7 octobre 2026)
 
 Convention de citation :
 - **[O…]** : source officielle (France Travail, Unédic, GIP-MDS/net-entreprises, Légifrance, ministères).
@@ -13,7 +13,7 @@ Toutes les URL sont listées en fin de document.
 - **Le nom du document.** France Travail emploie deux sigles :
   - « AE-CS » sur les pages destinées aux salariés et dans le flyer [O1][O2][O3] ;
   - « AER CS (Attestation Employeur Rematérialisée Cinéma Spectacle) » sur une page destinée aux employeurs [O5].
-  « AER CS » n'est donc pas seulement un terme d'éditeur. Bascule doit reconnaître les trois formes : AE-CS, AER CS et AE CS.
+  « AER CS » n'est donc pas seulement un terme d'éditeur. Cachet doit reconnaître les trois formes : AE-CS, AER CS et AE CS.
 - **Le calendrier officiel (certitude moyenne).**
   - L'expérimentation a commencé en juillet 2025 [O8][O9].
   - France Travail annonce un déploiement « par vagues jusqu'à fin mars 2027 », avec coexistence des AEM et des AE-CS d'ici là [O1][O2][O3]. Ce n'est pas janvier 2027, comme le dit l'article Movinmotion.
@@ -69,10 +69,10 @@ Toutes les URL sont listées en fin de document.
   - mesdroitssociaux.gouv.fr : 12 derniers mois, montant net social, aucun export [O26].
   - info-retraite.fr : relevé de carrière annuel [O27].
   - Audiens : attestation de paiement Congés Spectacles annuelle [G1].
-- **Les API ne sont pas accessibles à Bascule.**
+- **Les API ne sont pas accessibles à Cachet.**
   - France Travail Connect, API « Expériences déclarées par l'employeur » : elle renvoie les dates, la quantité de travail et l'employeur, mais ni salaire, ni cachets, ni annexe. L'échange du jeton exige un serveur avec un `client_secret`, localhost est interdit, et l'accès passe par un audit [O28][O29].
   - API « Indemnisations » : elle ne renvoie que deux booléens [O30].
-  - API Particulier et FranceConnect ne sont pas ouverts à un outil privé comme Bascule [O31][O32].
+  - API Particulier et FranceConnect ne sont pas ouverts à un outil privé comme Cachet [O31][O32].
 - **Le bulletin de paie.**
   - Il existe toujours, mais seule la partie basse est normalisée : à partir de « MONTANT BRUT », les cotisations, le net social et le net à payer.
   - La partie haute (période, heures, cachets, éléments de salaire) est de présentation libre [O33][O35].
@@ -80,7 +80,7 @@ Toutes les URL sont listées en fin de document.
   - Deux maquettes légales coexistent jusqu'au 31/12/2026 [O36].
   - Le code du travail exige un « format structuré » pour les bulletins électroniques, sans définir de schéma. En pratique, c'est un PDF [O37].
 
-## 3. Conséquences pour Bascule
+## 3. Conséquences pour Cachet
 
 **Faut-il faire de l'AEM la source principale ? Non. Mais c'est le bon premier format à importer.**
 - Elle couvre l'essentiel de l'historique 2025-2026 et suit un modèle Unédic unique.
@@ -125,7 +125,7 @@ interface EtatDroitsFT {                                // vérité terrain Fran
 - **France Travail sert de vérité terrain.**
   - AJ, SJR, jours restants et jours payés par mois sont saisis depuis la notification, le tableau comparatif ou les paiements.
   - « Mes 2 dernières années » sert à vérifier qu'aucune période ne manque, d'un côté comme de l'autre.
-  - Bascule affiche son propre calcul à côté de celui de France Travail et signale l'écart.
+  - Cachet affiche son propre calcul à côté de celui de France Travail et signale l'écart.
 - **Les importeurs sont des plugins.**
   - Interface : `detect(texte) → score`, puis `parse(texte) → périodes + alertes`.
   - Signature de l'AE-CS : « annexes 8 et 10 » + « R.133-14 » dans l'en-tête [O4].

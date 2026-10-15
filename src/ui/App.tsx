@@ -35,14 +35,14 @@ export function App() {
           <a className="btn" href="#/aide">Comprendre</a>
           <a className="btn" href="#/sauvegarde"><Save />Sauvegarder</a>
           <a className="btn icon" href="#/parametres" aria-label="Paramètres"><Sliders /></a>
-          <a className="btn donate" href={DONATE_URL || '#/soutenir'} target={DONATE_URL ? '_blank' : undefined} rel="noreferrer">♥ Faire un don</a>
+          {DONATE_URL && <a className="btn donate" href={DONATE_URL} target="_blank" rel="noreferrer">♥ Faire un don</a>}
         </nav>
       </header>
       {page}
       <footer className="tiny muted" style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', paddingTop: 12, borderTop: '1px solid var(--line)' }}>
         <span>Logiciel libre · vos données restent dans votre navigateur · aide au calcul, pas un avis juridique.</span>
         <span style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <a className="btn sm" href={REPO_URL || '#/soutenir'} target={REPO_URL ? '_blank' : undefined} rel="noreferrer"><GitHub />Code source sur GitHub</a>
+          {REPO_URL && <a className="btn sm" href={REPO_URL} target="_blank" rel="noreferrer"><GitHub />Code source sur GitHub</a>}
           <a href="#/bienvenue">Revoir l'explication</a>
         </span>
       </footer>

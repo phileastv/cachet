@@ -8,8 +8,8 @@ export function SupportPage() {
         <p style={{ margin: 0 }}>{APP_NAME} est gratuit, sans publicité et open source : son code est public, tout le monde peut vérifier les calculs, les corriger ou les améliorer.</p>
         <p style={{ margin: 0 }}>S'il vous a aidé·e, vous pouvez soutenir le projet par un don, et surtout en parler autour de vous pour que d'autres ne tombent pas dans le piège du droit d'option.</p>
         <div className="nav">
-          {DONATE_URL ? <a className="btn donate" href={DONATE_URL} target="_blank" rel="noreferrer">♥ Faire un don</a> : <span className="btn" aria-disabled="true">♥ Lien de don : [À CONFIGURER]</span>}
-          {REPO_URL ? <a className="btn" href={REPO_URL} target="_blank" rel="noreferrer">Code source sur GitHub</a> : <span className="btn" aria-disabled="true">GitHub : [À CONFIGURER]</span>}
+          {DONATE_URL && <a className="btn donate" href={DONATE_URL} target="_blank" rel="noreferrer">♥ Faire un don</a>}
+          {REPO_URL && <a className="btn" href={REPO_URL} target="_blank" rel="noreferrer">Code source sur GitHub</a>}
         </div>
       </section>
     </>

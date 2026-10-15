@@ -7,7 +7,7 @@ export function BetaBanner() {
     <div className="beta-banner" role="note">
       <strong>Outil expérimental.</strong> Testé sur de vrais dossiers France Travail et conçu pour être aussi fiable que possible, il peut
       pourtant se tromper : prenez ses résultats avec des pincettes. Il ne remplace pas France Travail, seul à décider de vos droits.
-      {CONTACT ? <> Une erreur, une question ? <a href={`mailto:${CONTACT}`}>{CONTACT}</a></> : null}
+      {CONTACT ? <> Faites-moi vos retours par mail : <a href={`mailto:${CONTACT}`}>{CONTACT}</a></> : null}
     </div>
   );
 }

@@ -1,7 +1,9 @@
-# Bascule · calculateur du droit d'option intermittent
+# Cachet · calculateur du droit d'option intermittent
+
+En ligne : https://cachet.phileas.tv (adresse secondaire : https://intermittent.phileas.tv).
 
 Vous êtes au chômage au régime général et vous voulez devenir intermittent·e du spectacle ?
-Bascule calcule **si** et **quand** vous pourrez demander le *droit d'option*, mois par mois,
+Cachet calcule **si** et **quand** vous pourrez demander le *droit d'option*, mois par mois,
 et compare plusieurs stratégies (arrêter de travailler, sprint, un mois sur deux, ARCE, cours…).
 
 - **100 % dans le navigateur** : aucune donnée n'est envoyée à un serveur. Site statique.
@@ -20,6 +22,20 @@ npm run dev      # http://localhost:5180
 npm test         # tests du moteur de calcul
 npm run build    # site statique dans dist/
 ```
+
+Adresse de contact du bandeau : copier `.env.example` en `.env.local` (jamais versionné) et y mettre
+`VITE_CONTACT_EMAIL`. Lien de don et dépôt : `src/config.ts`.
+
+## Mettre en ligne (hébergement statique, ex. o2switch)
+
+1. `npm run build` : tout le site est dans `dist/`, polices comprises. Aucune requête externe,
+   aucune base de données, aucun serveur applicatif.
+2. Copier **le contenu** de `dist/` à la racine du domaine (ex. `cachet.phileas.tv/`), y compris
+   `.htaccess` (redirection de l'adresse secondaire, https, type MIME des `.mjs`, cache, en-têtes).
+3. Vérifier en ligne : l'accueil s'affiche, puis Mes données › déposer un relevé de situation (PDF) :
+   si le lecteur PDF ne démarre pas, l'hébergeur ne sert pas `.mjs` en `application/javascript`.
+
+Les données restent dans le navigateur de l'utilisateur : rien n'est stocké côté serveur.
 
 ## Règles implémentées
 

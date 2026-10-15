@@ -6,7 +6,7 @@ import { uid, useStore } from '../state/store';
 import { eur, eur2, num, rateColor } from './format';
 import { Calendar, Close, Info, Left, Right, Trash } from './Icons';
 import { DocImport } from './DocImport';
-import { AemGuide, ReleveGuide } from './ImportGuides';
+import { AemGuide, FT_COURRIERS_URL, ReleveGuide } from './ImportGuides';
 import { Tour, type TourStep } from './Tour';
 
 const CONTRACT_TOUR: TourStep[] = [
@@ -482,7 +482,7 @@ function RegimeGeneral() {
             <li><strong>Relevé de situation / attestations</strong> : « Mes échanges et documents ».</li>
             <li><strong>Salaire de référence</strong> : sur la notification d'ouverture de droits. Sinon, laissez vide.</li>
           </ol>
-          <div style={{ height: 130, border: '2px dashed var(--line)', borderRadius: 12, display: 'grid', placeItems: 'center', textAlign: 'center', fontSize: 12, padding: 8 }} className="muted">[Capture annotée de l'espace France Travail : à ajouter]</div>
+          <a className="btn" href={FT_COURRIERS_URL} target="_blank" rel="noopener noreferrer">Ouvrir mes courriers France Travail ↗</a>
           <span className="tiny muted">Vos données restent dans ce navigateur : rien n'est envoyé à un serveur.</span>
         </section>
       </aside>
