@@ -2,6 +2,8 @@
 
 **En ligne : https://cachet.phileas.tv**
 
+![Tableau de bord de Cachet : mois par mois, heures d'intermittence, chômage versé et statut du droit d'option, avec le chômage restant et le droit intermittent comparés](docs/screenshots/tableau-de-bord.webp)
+
 Vous êtes au chômage au régime général et vous enchaînez des contrats d'intermittent du spectacle ?
 Pour passer intermittent·e, il faut demander le **droit d'option** à France Travail, et il n'est accordé
 que sous conditions (507 h sur 12 mois, et un droit intermittent au moins 30 % plus élevé que le chômage
@@ -22,6 +24,14 @@ plusieurs stratégies (arrêter de travailler, sprint, un mois sur deux, cours, 
 - **Simulation des contrats à venir** (comme un mois passé, à peu près mois par mois, ou un par un)
   et scénarios comparés.
 - **Détail de chaque calcul** (allocation A + B + C, jours retirés du droit intermittent, règle des 70 %).
+
+## Captures d'écran
+
+Données d'exemple, fictives.
+
+| Contrats : import des AEM, calendrier, liste | Chômage : import du relevé de situation |
+|---|---|
+| ![Page des contrats : guide en 3 étapes pour déposer ses AEM, calendrier du mois avec les jours réels et simulés, liste de tous les contrats](docs/screenshots/contrats.webp) | ![Page du chômage : dépôt du relevé de situation, relevés enregistrés, profil et périodes sans indemnisation repliés](docs/screenshots/chomage.webp) |
 
 ## Vie privée
 
