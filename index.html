@@ -3,16 +3,86 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Savoir quand demander le droit d'option pour passer du chômage au régime général à l'intermittence du spectacle. Vos données restent dans votre navigateur." />
-    <title>%APP_TITLE%</title>
+    <title>Calcul du droit d'option intermittent, gratuit · %APP_NAME%</title>
+    <meta name="description" content="Calculateur gratuit du droit d'option pour l'intermittence du spectacle : savoir si et quand passer du chômage classique à intermittent. Précis et privé." />
     <link rel="canonical" href="%SITE_URL%/" />
-    <link rel="apple-touch-icon" href="./logo.svg" />
-    <meta property="og:title" content="%APP_TITLE%" />
-    <meta property="og:image" content="%SITE_URL%/logo.svg" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#E8762B" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Crect x='1' y='1' width='8' height='8' rx='2' fill='%23ECEEF2'/%3E%3Crect x='11' y='1' width='8' height='8' rx='2' fill='%23F6A66A'/%3E%3Crect x='21' y='1' width='8' height='8' rx='2' fill='%23E8762B'/%3E%3Crect x='1' y='11' width='8' height='8' rx='2' fill='%23F6A66A'/%3E%3Crect x='11' y='11' width='8' height='8' rx='2' fill='%23E8762B'/%3E%3Crect x='21' y='11' width='8' height='8' rx='2' fill='%23B4500F'/%3E%3Crect x='1' y='21' width='8' height='8' rx='2' fill='%23E8762B'/%3E%3Crect x='11' y='21' width='8' height='8' rx='2' fill='%23B4500F'/%3E%3Crect x='21' y='21' width='8' height='8' rx='2' fill='%232F6FE4'/%3E%3C/svg%3E" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+
+    <!-- Partage (réseaux sociaux, messageries) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:site_name" content="%APP_NAME%" />
+    <meta property="og:url" content="%SITE_URL%/" />
+    <meta property="og:title" content="Calculateur du droit d'option intermittent du spectacle, gratuit" />
+    <meta property="og:description" content="Savoir si et quand passer du chômage classique à l'intermittence du spectacle : 507 h, règle des 30 %, date de demande. Gratuit, open source, 100 % dans votre navigateur." />
+    <meta property="og:image" content="%SITE_URL%/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Cachet, calculateur gratuit du droit d'option intermittent du spectacle" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Données structurées : application web gratuite, et questions fréquentes -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebApplication",
+            "name": "%APP_NAME%",
+            "alternateName": "Calculateur du droit d'option intermittent",
+            "url": "%SITE_URL%/",
+            "description": "Calculateur gratuit du droit d'option pour l'intermittence du spectacle : 507 heures, règle des 30 %, date de demande, allocation intermittente estimée, import des relevés France Travail et des AEM.",
+            "applicationCategory": "FinanceApplication",
+            "operatingSystem": "Tout navigateur récent",
+            "inLanguage": "fr-FR",
+            "isAccessibleForFree": true,
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+            "license": "https://www.gnu.org/licenses/agpl-3.0.html",
+            "author": { "@type": "Person", "name": "Philéas", "url": "https://phileas.tv" }
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Qu'est-ce que le droit d'option intermittent ?",
+                "acceptedAnswer": { "@type": "Answer", "text": "Quand on est au chômage au régime général et qu'on enchaîne des contrats d'intermittent du spectacle, le droit d'option permet de renoncer au chômage restant pour ouvrir des droits d'intermittent (annexes 8 et 10). France Travail l'accorde si l'on a 507 heures sur 12 mois et si le nouveau droit dépasse d'au moins 30 % le chômage restant (ou si l'allocation actuelle est de 20 € par jour ou moins)." }
+              },
+              {
+                "@type": "Question",
+                "name": "Comment calculer son droit d'option ?",
+                "acceptedAnswer": { "@type": "Answer", "text": "Il faut comparer le montant global du droit intermittent, soit l'allocation intermittente multipliée par 365 jours moins les jours écoulés depuis la fin de contrat, le délai d'attente et les franchises, au chômage restant. Cachet fait ce calcul mois par mois à partir de vos relevés de situation et de vos AEM, et indique la date à laquelle envoyer la demande." }
+              },
+              {
+                "@type": "Question",
+                "name": "Le calculateur du droit d'option est-il gratuit ?",
+                "acceptedAnswer": { "@type": "Answer", "text": "Oui. Cachet est gratuit, sans publicité et open source. Tout est calculé dans votre navigateur : aucun document ni aucune donnée n'est envoyé à un serveur." }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Contenu lisible sans JavaScript (moteurs de recherche, aperçus) ; remplacé par l'application au chargement -->
+      <main style="max-width: 760px; margin: 48px auto; padding: 0 20px; font-family: system-ui, sans-serif; line-height: 1.55; color: #24303f">
+        <h1>Calculateur du droit d'option intermittent du spectacle</h1>
+        <p><strong>%APP_NAME%</strong> est un outil gratuit de calcul du droit d'option : vous êtes au chômage au régime général et vous enchaînez des contrats d'intermittent du spectacle ? Il calcule si et quand vous pouvez passer à l'intermittence, mois par mois.</p>
+        <ul>
+          <li>Les <strong>507 heures</strong> sur 12 mois, au jour près, avec cours et formation.</li>
+          <li>La <strong>règle des 30 %</strong> : votre droit intermittent comparé à votre chômage restant, avec la formule de France Travail.</li>
+          <li>Votre <strong>allocation intermittente</strong> estimée (annexes 8 et 10) et la meilleure date pour envoyer la demande.</li>
+          <li>L'<strong>import de vos documents</strong> : relevés de situation France Travail et AEM, lus dans votre navigateur.</li>
+        </ul>
+        <p>Gratuit, open source, sans compte : vos données restent sur votre appareil. Outil expérimental, testé sur de vrais dossiers : seul France Travail décide de vos droits.</p>
+        <noscript><p><strong>Activez JavaScript pour utiliser le calculateur.</strong></p></noscript>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

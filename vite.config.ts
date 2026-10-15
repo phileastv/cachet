@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
   return {
     base: './',
     define: { __CONTACT_B64__: JSON.stringify(Buffer.from(contact, 'utf8').toString('base64')) },
-    plugins: [react(), { name: 'app-title', transformIndexHtml: (html) => html.replaceAll('%APP_TITLE%', `${name} · ${tagline}`).replaceAll('%SITE_URL%', site) }],
+    plugins: [react(), { name: 'app-title', transformIndexHtml: (html) => html.replaceAll('%APP_TITLE%', `${name} · ${tagline}`).replaceAll('%APP_NAME%', name).replaceAll('%SITE_URL%', site) }],
     server: { port: Number(process.env.PORT) || 5180 },
   };
 });
