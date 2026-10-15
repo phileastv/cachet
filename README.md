@@ -49,7 +49,7 @@ Données d'exemple, fictives.
 
 ## Démarrer
 
-> **Note sur le développement.** Le code de Cachet a été écrit en grande partie avec l'aide d'une IA
+> **Note sur le développement.** Le code de Cachet a été écrit quasiment intégralement avec une IA
 > (« vibe coding »). Les calculs, eux, ont été vérifiés avec soin sur de véritables dossiers France Travail
 > (relevés de situation, AEM, notifications et décisions réelles), et les règles sont sourcées dans le
 > tableau plus bas. Relectures et corrections bienvenues.
@@ -62,16 +62,20 @@ npm run build    # site statique dans dist/
 ```
 
 **Configuration** : nom de l'outil, adresses du site, lien de don et dépôt sont dans `.env` (versionné).
-Les valeurs locales ou privées, comme l'adresse de contact du bandeau (`VITE_CONTACT_EMAIL`), vont dans
-`.env.local` (jamais versionné, modèle dans `.env.example`). Les domaines du `.htaccess` sont à adapter à la main.
 
-## Mettre en ligne (hébergement statique, ex. o2switch)
+## Mettre en ligne
 
 1. `npm run build` : tout le site est dans `dist/`, polices comprises.
 2. Copier **le contenu** de `dist/` à la racine du domaine, y compris `.htaccess` (redirection de
    l'adresse secondaire, https, type MIME des `.mjs`, cache, en-têtes de sécurité).
 3. Vérifier en ligne : l'accueil s'affiche, puis Mes données › déposer un relevé de situation (PDF).
    Si le lecteur PDF ne démarre pas, l'hébergeur ne sert pas les `.mjs` en `application/javascript`.
+
+**Avec l'outil Git de cPanel (o2switch)** : `npm run deploy` lance les tests, compile le site et le publie
+sur la branche `production` (le site compilé et `.cpanel.yml`, rien d'autre), puis pousse `main` et
+`production`. Dans cPanel › Git Version Control, le dépôt est cloné sur la branche `production` ;
+« Update from Remote » puis « Deploy HEAD Commit » copient le site dans le dossier du sous-domaine
+(chemin dans `deploy/.cpanel.yml`).
 
 ## Règles implémentées
 

@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "examples": "WRITE_EXAMPLES=1 vitest run src/examples"
+    "examples": "WRITE_EXAMPLES=1 vitest run src/examples",
+    "deploy": "sh scripts/publish.sh"
   },
   "dependencies": {
     "@fontsource/atkinson-hyperlegible": "^5.3.0",

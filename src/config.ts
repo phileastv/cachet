@@ -17,5 +17,15 @@ export const ALT_URL = str(env.VITE_ALT_URL);
 /** Lien de don et dépôt du code source : vides tant qu'ils n'existent pas (les boutons sont alors masqués). */
 export const DONATE_URL = str(env.VITE_DONATE_URL);
 export const REPO_URL = str(env.VITE_REPO_URL);
-/** Adresse de contact du bandeau (définie dans .env.local pour ne pas figurer dans le dépôt). */
-export const CONTACT_EMAIL = str(env.VITE_CONTACT_EMAIL);
+declare const __CONTACT_B64__: string;
+/**
+ * Adresse de contact du bandeau. Elle vient de CONTACT_EMAIL dans .env.local (jamais versionné) et n'est
+ * présente qu'encodée dans le site compilé : les robots qui parcourent le code ne la lisent pas en clair.
+ */
+export const CONTACT_EMAIL = (() => {
+  try {
+    return typeof __CONTACT_B64__ === 'string' && __CONTACT_B64__ ? decodeURIComponent(escape(atob(__CONTACT_B64__))) : '';
+  } catch {
+    return '';
+  }
+})();
