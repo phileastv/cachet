@@ -165,7 +165,8 @@ function Intermittence() {
       <Tour id="contrats" steps={CONTRACT_TOUR} />
       <section className="card" data-tour="import" style={{ gap: 12, boxShadow: 'inset 4px 0 0 var(--int)' }}>
         <h2 style={{ color: 'var(--int-ink)' }}>Ajouter mes contrats en déposant mes AEM</h2>
-        <AemGuide />
+        {/* Déjà fait une fois (accueil ou import précédent) : le guide se replie */}
+        {data.contracts.some((c) => c.source?.kind === 'aem') ? <details className="toggle-manual"><summary>Où trouver mes AEM ?</summary><AemGuide /></details> : <AemGuide />}
         <DocImport kind="aem" />
       </section>
       <div className="row">
@@ -389,7 +390,7 @@ function RegimeGeneral() {
     <>
     <section className="card" style={{ gap: 12, boxShadow: 'inset 4px 0 0 var(--chom)' }}>
       <h2 style={{ color: 'var(--chom-ink)' }}>Mon chômage restant : déposez votre relevé de situation</h2>
-      <ReleveGuide />
+      {data.profile.releves.length ? <details className="toggle-manual"><summary>Où trouver mon relevé de situation ?</summary><ReleveGuide /></details> : <ReleveGuide />}
       <DocImport kind="releve" />
     </section>
     <div className="row">

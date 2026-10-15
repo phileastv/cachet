@@ -7,7 +7,7 @@ import { uid, useStore } from '../state/store';
 import { eur, num } from './format';
 import { DocImport } from './DocImport';
 import { Logo } from './Icons';
-import { ReleveGuide } from './ImportGuides';
+import { AemGuide, ReleveGuide } from './ImportGuides';
 
 const STEPS = [
   'Vous voulez devenir intermittent·e ?',
@@ -21,6 +21,7 @@ const STEPS = [
   '507 heures sur 12 mois glissants',
   'Un outil libre et gratuit',
   'Vos chiffres de chômage',
+  'Vos contrats d’intermittent',
 ];
 
 export function Onboarding() {
@@ -29,6 +30,9 @@ export function Onboarding() {
   const last = STEPS.length - 1;
   // Le bloc « Informations sur vos droits » d'un relevé est arrêté au dernier jour du mois précédent
   const releveCount = data.profile.releves.length;
+  const aemCount = data.contracts.filter((c) => c.source?.kind === 'aem').length;
+  /** Avant-dernière étape : le relevé ; dernière : les AEM. */
+  const relStep = STEPS.length - 2;
   // Téléphone : écran étroit et pointeur tactile
   const phone = typeof window !== 'undefined' && window.matchMedia?.('(max-width: 760px) and (pointer: coarse)').matches;
   const [phoneOk, setPhoneOk] = useState(false);
@@ -40,12 +44,16 @@ export function Onboarding() {
       go('/');
       return;
     }
+    const imported = data.contracts.some((c) => c.source?.kind === 'aem');
     update((d) => ({
       ...d,
       onboarded: true,
       profile: num(f.aj) ? { ...d.profile, releves: [{ id: uid(), date: f.date, daysLeft: num(f.daysLeft), dailyAllowance: num(f.aj) }] } : d.profile,
+      // AEM déjà importées ici : la visite guidée de la page des contrats n'apprendrait plus rien
+      toursSeen: imported ? [...new Set([...(d.toursSeen ?? []), 'contrats'])] : d.toursSeen,
     }));
-    go('/contrats');
+    // Contrats importés : on va droit au résultat ; sinon, vers la saisie des contrats
+    go(imported ? '/' : '/contrats');
   };
 
   return (
@@ -67,8 +75,8 @@ export function Onboarding() {
           <button className="btn sm" onClick={() => setPhoneOk(true)}>Compris</button>
         </div>
       )}
-      <main className={step === last ? 'full' : undefined}>
-        {step !== last && <section className="stage" aria-hidden="true"><Visual step={step} /></section>}
+      <main className={step >= relStep ? 'full' : undefined}>
+        {step < relStep && <section className="stage" aria-hidden="true"><Visual step={step} /></section>}
         <section className="text">
           <span style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
             <span className="tiny muted" style={{ fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase' }}>Étape {step + 1} sur {STEPS.length}</span>
@@ -76,7 +84,7 @@ export function Onboarding() {
           </span>
           <h1>{STEPS[step]}</h1>
           <Body step={step} />
-          {step === last && (
+          {step === relStep && (
             <div className="card" style={{ gap: 12 }}>
               <strong>Le plus simple : déposez votre dernier relevé de situation</strong>
               <ReleveGuide />
@@ -95,10 +103,23 @@ export function Onboarding() {
               <span className="tiny muted">Tout reste dans votre navigateur, et le code de l'outil est libre. À l'étape suivante, déposez vos AEM : vos contrats se créent tout seuls.</span>
             </div>
           )}
+          {step === last && (
+            <div className="card" style={{ gap: 12 }}>
+              <strong>Le plus simple : déposez toutes vos AEM d'un coup</strong>
+              <AemGuide />
+              <DocImport kind="aem" compact />
+              {aemCount > 0 && <span className="small" style={{ color: 'var(--ok)' }}>✓ {aemCount} contrat{aemCount > 1 ? 's' : ''} ajouté{aemCount > 1 ? 's' : ''} depuis vos AEM : vous pouvez voir votre résultat.</span>}
+              <details className="toggle-manual">
+                <summary>Ou ajouter mes contrats à la main</summary>
+                <span className="small">Cliquez « Continuer avec mes contrats » : vous cocherez les jours travaillés sur un calendrier, puis indiquerez heures et salaire brut de chaque contrat. Pratique aussi pour un contrat dont l'AEM n'est pas encore arrivée, ou un contrat à venir.</span>
+              </details>
+              <span className="tiny muted">Tout reste dans votre navigateur : aucun fichier n'est envoyé, et seuls les chiffres utiles au calcul sont gardés.</span>
+            </div>
+          )}
           <div className="nav">
             {step > 0 && <button className="btn" style={{ minHeight: 52 }} onClick={() => setStep(step - 1)}>← Précédent</button>}
             {step < last && <button className="btn dark" style={{ minHeight: 52, padding: '0 24px' }} onClick={() => setStep(step + 1)}>{step === 0 ? 'Comprendre pas à pas' : 'Suivant →'}</button>}
-            {step === last && <button className="btn primary" style={{ minHeight: 52, padding: '0 24px' }} onClick={() => finish(false)}>Continuer avec mes contrats →</button>}
+            {step === last && <button className="btn primary" style={{ minHeight: 52, padding: '0 24px' }} onClick={() => finish(false)}>{aemCount ? 'Voir mon résultat →' : 'Continuer avec mes contrats →'}</button>}
             {step === last && <button className="btn" style={{ minHeight: 52 }} onClick={() => finish(true)}>Essayer avec un exemple</button>}
             {step === 0 && <a className="btn ghost" href="#/sauvegarde">J'ai déjà une sauvegarde</a>}
           </div>
@@ -167,8 +188,10 @@ function Body({ step }: { step: number }) {
           {REPO_URL && <a className="btn ghost" href={REPO_URL} target="_blank" rel="noreferrer">Voir le code source</a>}
         </div>
       </>;
+    case 10:
+      return <P>Déposez votre dernier relevé de situation France Travail (ou recopiez ses chiffres). Les calculs partiront de là, et vous pourrez le mettre à jour chaque mois.</P>;
     default:
-      return <P>Dernière étape : déposez votre dernier relevé de situation France Travail (ou recopiez ses chiffres). Les calculs partiront de là, et vous pourrez le mettre à jour chaque mois.</P>;
+      return <P>Dernière étape : déposez vos AEM (attestations employeur) des 12 derniers mois. Vos contrats se créent tout seuls, avec les vrais jours travaillés et les vrais salaires.</P>;
   }
 }
 
